@@ -35,13 +35,6 @@ const testReportTemplate: TestReportTemplate = {
       required: true,
     },
     {
-      id: 'testDate',
-      name: 'testDate',
-      type: 'date',
-      label: '提测时间',
-      required: true,
-    },
-    {
       id: 'documents',
       name: 'documents',
       type: 'group',
@@ -106,8 +99,8 @@ const testReportTemplate: TestReportTemplate = {
               id: 'repoUrl',
               name: 'repoUrl',
               type: 'text',
-              label: '仓库地址',
-              placeholder: '请输入前端项目仓库地址',
+              label: '项目名',
+              placeholder: '请输入前端项目名称',
               required: true,
             },
             {
@@ -139,8 +132,8 @@ const testReportTemplate: TestReportTemplate = {
               id: 'repoUrl',
               name: 'repoUrl',
               type: 'text',
-              label: '仓库地址',
-              placeholder: '请输入后端项目仓库地址',
+              label: '项目名',
+              placeholder: '请输入后端项目名称',
               required: true,
             },
             {
@@ -320,7 +313,6 @@ const testReportTemplate: TestReportTemplate = {
 ## 基本信息
 
 - **项目名称**: ${values.projectName}
-- **提测时间**: ${values.testDate}
 - **相关文档**:
   - **PRD原型稿**: ${values.prdDocument}
 ${values.backendDocument ? `  - **后端技术文档**: ${values.backendDocument}` : ''}
@@ -331,12 +323,12 @@ ${values.smokeDoc ? `  - **冒烟文档**: ${values.smokeDoc}` : ''}
 ## 项目信息
 
 ### 前端项目
-| 仓库地址 | Git地址 | Jenkins地址 |
+| 项目名 | Git地址 | Jenkins地址 |
 |---------|---------|-------------|
 ${frontendProjectsTable}
 
 ### 后端项目
-| 仓库地址 | Git地址 | Jenkins地址 |
+| 项目名 | Git地址 | Jenkins地址 |
 |---------|---------|-------------|
 ${backendProjectsTable}
 
