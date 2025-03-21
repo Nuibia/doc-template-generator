@@ -86,8 +86,8 @@ const testReportTemplate: TestReportTemplate = {
           label: '冒烟文档',
           placeholder: '请输入冒烟文档链接（选填）',
           required: false,
-        }
-      ]
+        },
+      ],
     },
     {
       id: 'projects',
@@ -125,8 +125,8 @@ const testReportTemplate: TestReportTemplate = {
               label: 'Jenkins地址',
               placeholder: '请输入前端项目Jenkins地址',
               required: true,
-            }
-          ]
+            },
+          ],
         },
         {
           id: 'backendProjects',
@@ -158,10 +158,10 @@ const testReportTemplate: TestReportTemplate = {
               label: 'Jenkins地址',
               placeholder: '请输入后端项目Jenkins地址',
               required: true,
-            }
-          ]
-        }
-      ]
+            },
+          ],
+        },
+      ],
     },
     {
       id: 'serverConfigs',
@@ -215,10 +215,10 @@ const testReportTemplate: TestReportTemplate = {
               label: '配置代码',
               placeholder: '请输入配置代码段',
               required: true,
-            }
-          ]
-        }
-      ]
+            },
+          ],
+        },
+      ],
     },
     {
       id: 'developBranch',
@@ -275,8 +275,8 @@ const testReportTemplate: TestReportTemplate = {
           label: '测试人员',
           placeholder: '测试人员姓名，多人用逗号分隔',
           required: true,
-        }
-      ]
+        },
+      ],
     },
     {
       id: 'attention',
@@ -296,17 +296,24 @@ const testReportTemplate: TestReportTemplate = {
     },
   ],
   generateMarkdown: (values: Record<string, any>): string => {
-    const frontendProjectsTable = values.frontendProjects?.map((project: any) => 
-      `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
-    ).join('\n') || '';
+    const frontendProjectsTable =
+      values.frontendProjects
+        ?.map(
+          (project: any) => `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
+        )
+        .join('\n') || '';
 
-    const backendProjectsTable = values.backendProjects?.map((project: any) => 
-      `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
-    ).join('\n') || '';
+    const backendProjectsTable =
+      values.backendProjects
+        ?.map(
+          (project: any) => `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
+        )
+        .join('\n') || '';
 
-    const customConfigsTable = values.customConfigs?.map((config: any) => 
-      `| ${config.name} | \`\`\`\n${config.code}\n\`\`\` |`
-    ).join('\n') || '';
+    const customConfigsTable =
+      values.customConfigs
+        ?.map((config: any) => `| ${config.name} | \`\`\`\n${config.code}\n\`\`\` |`)
+        .join('\n') || '';
 
     return `# ${values.projectName} 提测文档
 
@@ -335,28 +342,44 @@ ${backendProjectsTable}
 
 ## 服务端配置
 
-${values.apolloConfig ? `### Apollo配置
+${
+  values.apolloConfig
+    ? `### Apollo配置
 \`\`\`
 ${values.apolloConfig}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
-${values.databaseConfig ? `### 数据库配置
+${
+  values.databaseConfig
+    ? `### 数据库配置
 \`\`\`
 ${values.databaseConfig}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
-${values.jobConfig ? `### 定时脚本&消费队列
+${
+  values.jobConfig
+    ? `### 定时脚本&消费队列
 \`\`\`
 ${values.jobConfig}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
-${customConfigsTable ? `### 自定义配置
+${
+  customConfigsTable
+    ? `### 自定义配置
 | 配置名称 | 配置代码 |
 |---------|---------|
-${customConfigsTable}` : ''}
+${customConfigsTable}`
+    : ''
+}
 
 - **开发分支**: ${values.developBranch}
 - **测试分支**: ${values.testBranch}
@@ -379,4 +402,4 @@ ${values.remark || '无'}
   },
 };
 
-export default testReportTemplate; 
+export default testReportTemplate;

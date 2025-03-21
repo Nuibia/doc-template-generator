@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /** @type {import('next').NextConfig} */
 const withLess = require('next-with-less');
 
@@ -8,6 +9,10 @@ const nextConfig = {
   output: 'export',
   images: {
     unoptimized: true,
+  },
+  eslint: {
+    dirs: ['src', 'pages', 'components'],
+    ignoreDuringBuilds: false,
   },
 };
 

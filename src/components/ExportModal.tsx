@@ -10,12 +10,7 @@ interface ExportModalProps {
   onCancel: () => void;
 }
 
-const ExportModal: React.FC<ExportModalProps> = ({
-  content,
-  title,
-  visible,
-  onCancel,
-}) => {
+const ExportModal: React.FC<ExportModalProps> = ({ content, title, visible, onCancel }) => {
   const [selectedPlatform, setSelectedPlatform] = useState(platforms[0].id);
   const [exporting, setExporting] = useState(false);
   const [form] = Form.useForm();
@@ -24,7 +19,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
     try {
       const values = await form.validateFields();
       setExporting(true);
-      
+
       const platform = platforms.find(p => p.id === selectedPlatform);
       if (!platform) {
         message.error('无效的平台选择');
@@ -86,12 +81,9 @@ const ExportModal: React.FC<ExportModalProps> = ({
         </Form.Item>
 
         <Form.Item label="选择平台">
-          <Radio.Group
-            value={selectedPlatform}
-            onChange={(e) => setSelectedPlatform(e.target.value)}
-          >
+          <Radio.Group value={selectedPlatform} onChange={e => setSelectedPlatform(e.target.value)}>
             <Space direction="vertical">
-              {platforms.map((platform) => (
+              {platforms.map(platform => (
                 <Radio key={platform.id} value={platform.id}>
                   {platform.name} - {platform.description}
                 </Radio>
@@ -99,7 +91,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
             </Space>
           </Radio.Group>
         </Form.Item>
-        
+
         {selectedPlatform === 'wiki' && (
           <Form.Item
             name="wikiSpace"
@@ -129,10 +121,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
             >
               <Input placeholder="请输入语雀知识库" />
             </Form.Item>
-            <Form.Item
-              name="yuqueGroup"
-              label="语雀分组"
-            >
+            <Form.Item name="yuqueGroup" label="语雀分组">
               <Input placeholder="请输入语雀分组（可选）" />
             </Form.Item>
           </>
@@ -152,4 +141,4 @@ const ExportModal: React.FC<ExportModalProps> = ({
   );
 };
 
-export default ExportModal; 
+export default ExportModal;

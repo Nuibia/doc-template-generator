@@ -22,12 +22,24 @@ const HomePage: React.FC = () => {
       </div>
 
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Card title="内置模板" bordered={false}>
+        <Card title="内置模板" variant="borderless">
           <Space size="large">
             <Card
               hoverable
               style={{ width: 240 }}
-              cover={<div style={{ height: 160, display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}><FileTextOutlined style={{ fontSize: 64 }} /></div>}
+              cover={
+                <div
+                  style={{
+                    height: 160,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#f5f5f5',
+                  }}
+                >
+                  <FileTextOutlined style={{ fontSize: 64 }} />
+                </div>
+              }
             >
               <Card.Meta
                 title="提测文档"
@@ -43,7 +55,19 @@ const HomePage: React.FC = () => {
             <Card
               hoverable
               style={{ width: 240 }}
-              cover={<div style={{ height: 160, display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}><FileMarkdownOutlined style={{ fontSize: 64 }} /></div>}
+              cover={
+                <div
+                  style={{
+                    height: 160,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#f5f5f5',
+                  }}
+                >
+                  <FileMarkdownOutlined style={{ fontSize: 64 }} />
+                </div>
+              }
             >
               <Card.Meta
                 title="发布计划"
@@ -58,10 +82,8 @@ const HomePage: React.FC = () => {
           </Space>
         </Card>
 
-        <Card title="自定义模板" bordered={false}>
-          <Paragraph>
-            创建自定义的文档模板，定义表单字段和输出格式
-          </Paragraph>
+        <Card title="自定义模板" variant="borderless">
+          <Paragraph>创建自定义的文档模板，定义表单字段和输出格式</Paragraph>
           <Link href="/templates/custom" passHref>
             <Button type="primary">创建自定义模板</Button>
           </Link>
@@ -71,4 +93,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage; 
+export default HomePage;

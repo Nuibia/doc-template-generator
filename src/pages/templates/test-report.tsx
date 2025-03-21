@@ -1,6 +1,30 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Typography, Card, Tabs, Select, DatePicker, Space, Radio, message, Divider, Table, Modal } from 'antd';
-import { ArrowLeftOutlined, ExportOutlined, CopyOutlined, EyeOutlined, FileTextOutlined, TeamOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+  Form,
+  Input,
+  Button,
+  Typography,
+  Card,
+  Tabs,
+  Select,
+  DatePicker,
+  Space,
+  Radio,
+  message,
+  Divider,
+  Table,
+  Modal,
+} from 'antd';
+import {
+  ArrowLeftOutlined,
+  ExportOutlined,
+  CopyOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  TeamOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 import Link from 'next/link';
 import Head from 'next/head';
 import ReactMarkdown from 'react-markdown';
@@ -90,7 +114,7 @@ const TestReportPage: React.FC = () => {
     // 处理日期格式
     const formattedValues = {
       ...allValues,
-      testDate: allValues.testDate ? allValues.testDate.format('YYYY-MM-DD') : ''
+      testDate: allValues.testDate ? allValues.testDate.format('YYYY-MM-DD') : '',
     };
     const markdownContent = generateMarkdown(formattedValues);
     setGeneratedContent(markdownContent);
@@ -108,17 +132,24 @@ const TestReportPage: React.FC = () => {
   };
 
   const generateMarkdown = (values: TemplateFormValues): string => {
-    const frontendProjectsTable = values.frontendProjects?.map((project: Project) => 
-      `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
-    ).join('\n') || '';
+    const frontendProjectsTable =
+      values.frontendProjects
+        ?.map(
+          (project: Project) => `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
+        )
+        .join('\n') || '';
 
-    const backendProjectsTable = values.backendProjects?.map((project: Project) => 
-      `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
-    ).join('\n') || '';
+    const backendProjectsTable =
+      values.backendProjects
+        ?.map(
+          (project: Project) => `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
+        )
+        .join('\n') || '';
 
-    const customConfigsTable = values.customConfigs?.map((config: ServerConfig) => 
-      `| ${config.name} | \`\`\`\n${config.code}\n\`\`\` |`
-    ).join('\n') || '';
+    const customConfigsTable =
+      values.customConfigs
+        ?.map((config: ServerConfig) => `| ${config.name} | \`\`\`\n${config.code}\n\`\`\` |`)
+        .join('\n') || '';
 
     return `# ${values.projectName} 提测文档
 
@@ -147,28 +178,44 @@ ${backendProjectsTable}
 
 ## 服务端配置
 
-${values.apolloConfig ? `### Apollo配置
+${
+  values.apolloConfig
+    ? `### Apollo配置
 \`\`\`
 ${values.apolloConfig}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
-${values.databaseConfig ? `### 数据库配置
+${
+  values.databaseConfig
+    ? `### 数据库配置
 \`\`\`
 ${values.databaseConfig}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
-${values.jobConfig ? `### 定时脚本&消费队列
+${
+  values.jobConfig
+    ? `### 定时脚本&消费队列
 \`\`\`
 ${values.jobConfig}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
-${customConfigsTable ? `### 自定义配置
+${
+  customConfigsTable
+    ? `### 自定义配置
 | 配置名称 | 配置代码 |
 |---------|---------|
-${customConfigsTable}` : ''}
+${customConfigsTable}`
+    : ''
+}
 
 - **开发分支**: ${values.developBranch}
 - **测试分支**: ${values.testBranch}
@@ -191,7 +238,8 @@ ${values.remark || '无'}
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedContent)
+    navigator.clipboard
+      .writeText(generatedContent)
       .then(() => {
         message.success('内容已复制到剪贴板');
       })
@@ -221,13 +269,15 @@ ${values.remark || '无'}
       <div className="page-header">
         <Space>
           <Link href="/" passHref>
-            <Button icon={<ArrowLeftOutlined />} type="link">返回首页</Button>
+            <Button icon={<ArrowLeftOutlined />} type="link">
+              返回首页
+            </Button>
           </Link>
-          <Title level={2} style={{ margin: 0 }}>提测文档模板</Title>
+          <Title level={2} style={{ margin: 0 }}>
+            提测文档模板
+          </Title>
         </Space>
-        <Paragraph className="description">
-          填写以下信息，自动生成标准格式的提测文档
-        </Paragraph>
+        <Paragraph className="description">填写以下信息，自动生成标准格式的提测文档</Paragraph>
       </div>
 
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
@@ -259,7 +309,7 @@ ${values.remark || '无'}
                 backendDeveloper: '',
                 tester: '',
                 attention: '',
-                remark: ''
+                remark: '',
               }}
             >
               <Form.Item
@@ -293,31 +343,19 @@ ${values.remark || '无'}
                 <Input placeholder="请输入PRD文档链接" />
               </Form.Item>
 
-              <Form.Item
-                name="backendDocument"
-                label="后端技术文档"
-              >
+              <Form.Item name="backendDocument" label="后端技术文档">
                 <Input placeholder="请输入后端技术文档链接（选填）" />
               </Form.Item>
 
-              <Form.Item
-                name="frontendDocument"
-                label="前端技术文档"
-              >
+              <Form.Item name="frontendDocument" label="前端技术文档">
                 <Input placeholder="请输入前端技术文档链接（选填）" />
               </Form.Item>
 
-              <Form.Item
-                name="uiDocument"
-                label="UI稿"
-              >
+              <Form.Item name="uiDocument" label="UI稿">
                 <Input placeholder="请输入UI稿链接（选填）" />
               </Form.Item>
 
-              <Form.Item
-                name="smokeDoc"
-                label="冒烟文档"
-              >
+              <Form.Item name="smokeDoc" label="冒烟文档">
                 <Input placeholder="请输入冒烟文档链接（选填）" />
               </Form.Item>
 
@@ -333,7 +371,19 @@ ${values.remark || '无'}
                   <>
                     {fields.map(({ key, name, ...restField }, index) => (
                       <React.Fragment key={key}>
-                        <Card style={{ marginBottom: 16 }} extra={<Button type="link" danger icon={<DeleteOutlined />} onClick={() => remove(name)}>删除</Button>}>
+                        <Card
+                          style={{ marginBottom: 16 }}
+                          extra={
+                            <Button
+                              type="link"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => remove(name)}
+                            >
+                              删除
+                            </Button>
+                          }
+                        >
                           <Space direction="vertical" style={{ width: '100%' }}>
                             <Form.Item
                               {...restField}
@@ -361,10 +411,10 @@ ${values.remark || '无'}
                             </Form.Item>
                           </Space>
                         </Card>
-                        <Button 
-                          type="dashed" 
-                          onClick={() => add(undefined, index + 1)} 
-                          block 
+                        <Button
+                          type="dashed"
+                          onClick={() => add(undefined, index + 1)}
+                          block
                           icon={<PlusOutlined />}
                           style={{ marginBottom: 16 }}
                         >
@@ -373,10 +423,10 @@ ${values.remark || '无'}
                       </React.Fragment>
                     ))}
                     {fields.length === 0 && (
-                      <Button 
-                        type="dashed" 
-                        onClick={() => add()} 
-                        block 
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
                         icon={<PlusOutlined />}
                         style={{ marginBottom: 16 }}
                       >
@@ -392,7 +442,19 @@ ${values.remark || '无'}
                   <>
                     {fields.map(({ key, name, ...restField }, index) => (
                       <React.Fragment key={key}>
-                        <Card style={{ marginBottom: 16 }} extra={<Button type="link" danger icon={<DeleteOutlined />} onClick={() => remove(name)}>删除</Button>}>
+                        <Card
+                          style={{ marginBottom: 16 }}
+                          extra={
+                            <Button
+                              type="link"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => remove(name)}
+                            >
+                              删除
+                            </Button>
+                          }
+                        >
                           <Space direction="vertical" style={{ width: '100%' }}>
                             <Form.Item
                               {...restField}
@@ -420,10 +482,10 @@ ${values.remark || '无'}
                             </Form.Item>
                           </Space>
                         </Card>
-                        <Button 
-                          type="dashed" 
-                          onClick={() => add(undefined, index + 1)} 
-                          block 
+                        <Button
+                          type="dashed"
+                          onClick={() => add(undefined, index + 1)}
+                          block
                           icon={<PlusOutlined />}
                           style={{ marginBottom: 16 }}
                         >
@@ -432,10 +494,10 @@ ${values.remark || '无'}
                       </React.Fragment>
                     ))}
                     {fields.length === 0 && (
-                      <Button 
-                        type="dashed" 
-                        onClick={() => add()} 
-                        block 
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
                         icon={<PlusOutlined />}
                         style={{ marginBottom: 16 }}
                       >
@@ -453,30 +515,21 @@ ${values.remark || '无'}
                 </Space>
               </Divider>
 
-              <Form.Item
-                name="apolloConfig"
-                label="Apollo配置"
-              >
+              <Form.Item name="apolloConfig" label="Apollo配置">
                 <TextArea
                   placeholder="请输入Apollo配置代码段"
                   autoSize={{ minRows: 4, maxRows: 8 }}
                 />
               </Form.Item>
 
-              <Form.Item
-                name="databaseConfig"
-                label="数据库配置"
-              >
+              <Form.Item name="databaseConfig" label="数据库配置">
                 <TextArea
                   placeholder="请输入数据库配置代码段"
                   autoSize={{ minRows: 4, maxRows: 8 }}
                 />
               </Form.Item>
 
-              <Form.Item
-                name="jobConfig"
-                label="定时脚本&消费队列"
-              >
+              <Form.Item name="jobConfig" label="定时脚本&消费队列">
                 <TextArea
                   placeholder="请输入定时脚本/消费队列代码段"
                   autoSize={{ minRows: 4, maxRows: 8 }}
@@ -488,7 +541,19 @@ ${values.remark || '无'}
                   <>
                     {fields.map(({ key, name, ...restField }, index) => (
                       <React.Fragment key={key}>
-                        <Card style={{ marginBottom: 16 }} extra={<Button type="link" danger icon={<DeleteOutlined />} onClick={() => remove(name)}>删除</Button>}>
+                        <Card
+                          style={{ marginBottom: 16 }}
+                          extra={
+                            <Button
+                              type="link"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => remove(name)}
+                            >
+                              删除
+                            </Button>
+                          }
+                        >
                           <Space direction="vertical" style={{ width: '100%' }}>
                             <Form.Item
                               {...restField}
@@ -511,10 +576,10 @@ ${values.remark || '无'}
                             </Form.Item>
                           </Space>
                         </Card>
-                        <Button 
-                          type="dashed" 
-                          onClick={() => add(undefined, index + 1)} 
-                          block 
+                        <Button
+                          type="dashed"
+                          onClick={() => add(undefined, index + 1)}
+                          block
                           icon={<PlusOutlined />}
                           style={{ marginBottom: 16 }}
                         >
@@ -523,10 +588,10 @@ ${values.remark || '无'}
                       </React.Fragment>
                     ))}
                     {fields.length === 0 && (
-                      <Button 
-                        type="dashed" 
-                        onClick={() => add()} 
-                        block 
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
                         icon={<PlusOutlined />}
                         style={{ marginBottom: 16 }}
                       >
@@ -592,24 +657,12 @@ ${values.remark || '无'}
                 <Input placeholder="测试人员姓名，多人用逗号分隔" />
               </Form.Item>
 
-              <Form.Item
-                name="attention"
-                label="注意事项"
-              >
-                <TextArea
-                  placeholder="需要特别注意的地方"
-                  autoSize={{ minRows: 3, maxRows: 6 }}
-                />
+              <Form.Item name="attention" label="注意事项">
+                <TextArea placeholder="需要特别注意的地方" autoSize={{ minRows: 3, maxRows: 6 }} />
               </Form.Item>
 
-              <Form.Item
-                name="remark"
-                label="备注"
-              >
-                <TextArea
-                  placeholder="其他需要备注的信息"
-                  autoSize={{ minRows: 2, maxRows: 4 }}
-                />
+              <Form.Item name="remark" label="备注">
+                <TextArea placeholder="其他需要备注的信息" autoSize={{ minRows: 2, maxRows: 4 }} />
               </Form.Item>
             </Form>
           </Card>
@@ -618,28 +671,21 @@ ${values.remark || '无'}
         <TabPane tab="预览文档" key="preview">
           <Card bordered={false}>
             <div style={{ marginBottom: 16 }}>
-              <Radio.Group 
-                value={previewMode} 
-                onChange={(e) => setPreviewMode(e.target.value)}
+              <Radio.Group
+                value={previewMode}
+                onChange={e => setPreviewMode(e.target.value)}
                 buttonStyle="solid"
                 style={{ marginBottom: 16 }}
               >
                 <Radio.Button value="rich">富文本预览</Radio.Button>
                 <Radio.Button value="markdown">Markdown预览</Radio.Button>
               </Radio.Group>
-              
+
               <Space style={{ float: 'right' }}>
-                <Button 
-                  icon={<CopyOutlined />} 
-                  onClick={copyToClipboard}
-                >
+                <Button icon={<CopyOutlined />} onClick={copyToClipboard}>
                   复制到剪贴板
                 </Button>
-                <Button 
-                  type="primary" 
-                  icon={<ExportOutlined />} 
-                  onClick={exportToMarkdown}
-                >
+                <Button type="primary" icon={<ExportOutlined />} onClick={exportToMarkdown}>
                   导出Markdown
                 </Button>
               </Space>
@@ -660,30 +706,33 @@ ${values.remark || '无'}
 
       {/* 固定位置的按钮组 */}
       {activeTab === 'form' && (
-        <div style={{
-          position: 'fixed',
-          left: 0,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          backgroundColor: '#fff',
-          padding: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          borderRadius: '0 8px 8px 0',
-          zIndex: 1000,
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            left: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: '#fff',
+            padding: '12px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            borderRadius: '0 8px 8px 0',
+            zIndex: 1000,
+          }}
+        >
           <Space direction="vertical">
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               icon={<EyeOutlined />}
               onClick={() => {
-                form.validateFields()
+                form
+                  .validateFields()
                   .then(() => setActiveTab('preview'))
                   .catch(() => message.error('请填写必填项'));
               }}
             >
               预览
             </Button>
-            <Button 
+            <Button
               icon={<DeleteOutlined />}
               onClick={() => {
                 Modal.confirm({
@@ -704,4 +753,4 @@ ${values.remark || '无'}
   );
 };
 
-export default TestReportPage; 
+export default TestReportPage;

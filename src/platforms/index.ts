@@ -16,7 +16,7 @@ export const wikiPlatform: Platform = {
     // 这里添加实际的Wiki导出逻辑
     console.log('导出到Wiki平台', content, options);
     return true;
-  }
+  },
 };
 
 // 飞书平台
@@ -28,7 +28,7 @@ export const feishuPlatform: Platform = {
     // 这里添加实际的飞书导出逻辑
     console.log('导出到飞书平台', content, options);
     return true;
-  }
+  },
 };
 
 // 语雀平台
@@ -40,7 +40,7 @@ export const yuquePlatform: Platform = {
     // 这里添加实际的语雀导出逻辑
     console.log('导出到语雀平台', content, options);
     return true;
-  }
+  },
 };
 
 // Notion平台
@@ -52,15 +52,10 @@ export const notionPlatform: Platform = {
     // 这里添加实际的Notion导出逻辑
     console.log('导出到Notion平台', content, options);
     return true;
-  }
+  },
 };
 
 // 导出所有平台
-const platforms: Platform[] = [
-  wikiPlatform,
-  feishuPlatform,
-  yuquePlatform,
-  notionPlatform
-];
+const platforms: Platform[] = [wikiPlatform, feishuPlatform, yuquePlatform, notionPlatform];
 
-export default platforms; 
+export default platforms;
