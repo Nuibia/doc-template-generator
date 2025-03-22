@@ -76,6 +76,9 @@ const TestReportPage: React.FC = () => {
       try {
         const parsedData = JSON.parse(savedData);
         form.setFieldsValue(parsedData);
+        // 加载数据后生成内容
+        const markdownContent = generateMarkdown(parsedData);
+        setGeneratedContent(markdownContent);
       } catch (error) {
         console.error('加载保存的数据失败:', error);
       }
@@ -119,14 +122,16 @@ const TestReportPage: React.FC = () => {
     const frontendProjectsTable =
       values.frontendProjects
         ?.map(
-          (project: Project) => `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
+          (project: Project) =>
+            `| ${project?.repoUrl} | ${project?.gitUrl} | ${project?.jenkinsUrl} |`
         )
         .join('\n') || '';
 
     const backendProjectsTable =
       values.backendProjects
         ?.map(
-          (project: Project) => `| ${project.repoUrl} | ${project.gitUrl} | ${project.jenkinsUrl} |`
+          (project: Project) =>
+            `| ${project?.repoUrl} | ${project?.gitUrl} | ${project?.jenkinsUrl} |`
         )
         .join('\n') || '';
 
@@ -686,7 +691,30 @@ ${values.remark || '无'}
         <Paragraph className="description">填写以下信息，自动生成标准格式的提测文档</Paragraph>
       </div>
 
-      <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+      <Tabs
+        activeKey={activeTab}
+        onChange={key => {
+          if (key === 'preview') {
+            // 切换到预览标签时，重新生成内容
+            form
+              .validateFields()
+              .then(values => {
+                const markdownContent = generateMarkdown(values);
+                setGeneratedContent(markdownContent);
+                setActiveTab(key);
+              })
+              .catch(() => {
+                message.error('请填写必填项');
+                // 验证失败时不切换标签
+                return;
+              });
+          } else {
+            // 直接切换到表单标签
+            setActiveTab(key);
+          }
+        }}
+        items={tabItems}
+      />
 
       {/* 固定位置的按钮组 */}
       {activeTab === 'form' && (
@@ -710,7 +738,12 @@ ${values.remark || '无'}
               onClick={() => {
                 form
                   .validateFields()
-                  .then(() => setActiveTab('preview'))
+                  .then(values => {
+                    // 先生成文档内容再切换到预览页
+                    const markdownContent = generateMarkdown(values);
+                    setGeneratedContent(markdownContent);
+                    setActiveTab('preview');
+                  })
                   .catch(() => message.error('请填写必填项'));
               }}
             >
