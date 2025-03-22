@@ -6,16 +6,18 @@ import {
   EyeOutlined,
   FileTextOutlined,
   PlusOutlined,
-  TeamOutlined,
 } from '@ant-design/icons';
 import {
   Button,
   Card,
+  Checkbox,
+  DatePicker,
   Divider,
   Form,
   Input,
   Modal,
   Radio,
+  Select,
   Space,
   Tabs,
   Typography,
@@ -25,43 +27,14 @@ import Head from 'next/head';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import testReportTemplate, { TemplateField } from '../../templates/testReport';
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
+const { Option } = Select;
 
-type Project = {
-  repoUrl: string;
-  gitUrl: string;
-  jenkinsUrl: string;
-};
-
-type ServerConfig = {
-  name: string;
-  code: string;
-};
-
-type TemplateFormValues = {
-  projectName: string;
-  prdDocument: string;
-  backendDocument: string;
-  frontendDocument: string;
-  uiDocument: string;
-  smokeDoc: string;
-  frontendProjects: Project[];
-  backendProjects: Project[];
-  apolloConfig: string;
-  databaseConfig: string;
-  jobConfig: string;
-  customConfigs: ServerConfig[];
-  developBranch: string;
-  testBranch: string;
-  productManager: string;
-  frontendDeveloper: string;
-  backendDeveloper: string;
-  tester: string;
-  attention: string;
-  remark: string;
-};
+// 将表单值类型定义为Record<string, any>以便与模板定义匹配
+type TemplateFormValues = Record<string, any>;
 
 const TestReportPage: React.FC = () => {
   const [form] = Form.useForm<TemplateFormValues>();
@@ -71,13 +44,13 @@ const TestReportPage: React.FC = () => {
 
   // 从 localStorage 加载保存的数据
   const loadSavedData = () => {
-    const savedData = localStorage.getItem('testReportFormData');
+    const savedData = localStorage.getItem(`${testReportTemplate.id}FormData`);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
         form.setFieldsValue(parsedData);
         // 加载数据后生成内容
-        const markdownContent = generateMarkdown(parsedData);
+        const markdownContent = testReportTemplate.generateMarkdown(parsedData);
         setGeneratedContent(markdownContent);
       } catch (error) {
         console.error('加载保存的数据失败:', error);
@@ -88,7 +61,7 @@ const TestReportPage: React.FC = () => {
   // 保存数据到 localStorage
   const saveToLocalStorage = (values: TemplateFormValues) => {
     try {
-      localStorage.setItem('testReportFormData', JSON.stringify(values));
+      localStorage.setItem(`${testReportTemplate.id}FormData`, JSON.stringify(values));
     } catch (error) {
       console.error('保存数据失败:', error);
     }
@@ -97,13 +70,13 @@ const TestReportPage: React.FC = () => {
   // 重置表单
   const handleReset = () => {
     form.resetFields();
-    localStorage.removeItem('testReportFormData');
+    localStorage.removeItem(`${testReportTemplate.id}FormData`);
     setGeneratedContent('');
   };
 
   // 监听表单值变化
   const handleFormValuesChange = (changedValues: any, allValues: TemplateFormValues) => {
-    const markdownContent = generateMarkdown(allValues);
+    const markdownContent = testReportTemplate.generateMarkdown(allValues);
     setGeneratedContent(markdownContent);
     // 实时保存到 localStorage
     saveToLocalStorage(allValues);
@@ -116,113 +89,6 @@ const TestReportPage: React.FC = () => {
 
   const handleFormSubmit = (values: TemplateFormValues) => {
     setActiveTab('preview');
-  };
-
-  const generateMarkdown = (values: TemplateFormValues): string => {
-    const frontendProjectsTable =
-      values.frontendProjects
-        ?.map(
-          (project: Project) =>
-            `| ${project?.repoUrl} | ${project?.gitUrl} | ${project?.jenkinsUrl} |`
-        )
-        .join('\n') || '';
-
-    const backendProjectsTable =
-      values.backendProjects
-        ?.map(
-          (project: Project) =>
-            `| ${project?.repoUrl} | ${project?.gitUrl} | ${project?.jenkinsUrl} |`
-        )
-        .join('\n') || '';
-
-    const customConfigsTable =
-      values.customConfigs
-        ?.map((config: ServerConfig) => `| ${config.name} | \`\`\`\n${config.code}\n\`\`\` |`)
-        .join('\n') || '';
-
-    return `# ${values.projectName} 提测文档
-
-## 基本信息
-
-- **项目名称**: ${values.projectName}
-- **相关文档**:
-  - **PRD原型稿**: ${values.prdDocument}
-${values.backendDocument ? `  - **后端技术文档**: ${values.backendDocument}` : ''}
-${values.frontendDocument ? `  - **前端技术文档**: ${values.frontendDocument}` : ''}
-${values.uiDocument ? `  - **UI稿**: ${values.uiDocument}` : ''}
-${values.smokeDoc ? `  - **冒烟文档**: ${values.smokeDoc}` : ''}
-
-## 项目信息
-
-### 前端项目
-| 项目名 | Git地址 | Jenkins地址 |
-|---------|---------|-------------|
-${frontendProjectsTable}
-
-### 后端项目
-| 项目名 | Git地址 | Jenkins地址 |
-|---------|---------|-------------|
-${backendProjectsTable}
-
-## 服务端配置
-
-${
-  values.apolloConfig
-    ? `### Apollo配置
-\`\`\`
-${values.apolloConfig}
-\`\`\`
-`
-    : ''
-}
-
-${
-  values.databaseConfig
-    ? `### 数据库配置
-\`\`\`
-${values.databaseConfig}
-\`\`\`
-`
-    : ''
-}
-
-${
-  values.jobConfig
-    ? `### 定时脚本&消费队列
-\`\`\`
-${values.jobConfig}
-\`\`\`
-`
-    : ''
-}
-
-${
-  customConfigsTable
-    ? `### 自定义配置
-| 配置名称 | 配置代码 |
-|---------|---------|
-${customConfigsTable}`
-    : ''
-}
-
-- **开发分支**: ${values.developBranch}
-- **测试分支**: ${values.testBranch}
-
-## 项目参与人员
-
-- **产品人员**: ${values.productManager}
-- **前端开发**: ${values.frontendDeveloper}
-- **后端开发**: ${values.backendDeveloper}
-- **测试人员**: ${values.tester}
-
-## 注意事项
-
-${values.attention || '无特别注意事项'}
-
-## 备注
-
-${values.remark || '无'}
-`;
   };
 
   const copyToClipboard = () => {
@@ -248,6 +114,187 @@ ${values.remark || '无'}
     URL.revokeObjectURL(url);
   };
 
+  // 动态渲染表单字段
+  const renderFormFields = (fields: TemplateField[], parentPath = '') => {
+    // 字段渲染策略，使用策略模式替代switch-case
+    const fieldRenderers = {
+      text: (field: TemplateField, fieldName: string, rules: any) => (
+        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+          <Input placeholder={field.placeholder} defaultValue={field.defaultValue} />
+        </Form.Item>
+      ),
+
+      textarea: (field: TemplateField, fieldName: string, rules: any) => (
+        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+          <TextArea
+            placeholder={field.placeholder}
+            defaultValue={field.defaultValue}
+            autoSize={{ minRows: 3, maxRows: 6 }}
+          />
+        </Form.Item>
+      ),
+
+      date: (field: TemplateField, fieldName: string, rules: any) => (
+        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+          <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
+        </Form.Item>
+      ),
+
+      select: (field: TemplateField, fieldName: string, rules: any) => (
+        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+          <Select placeholder={field.placeholder} defaultValue={field.defaultValue}>
+            {field.options?.map(option => (
+              <Option key={option.value} value={option.value}>
+                {option.label}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      ),
+
+      checkbox: (field: TemplateField, fieldName: string, rules: any) => (
+        <Form.Item
+          key={field.id}
+          name={fieldName}
+          label={field.label}
+          rules={rules}
+          valuePropName="checked"
+        >
+          <Checkbox>{field.label}</Checkbox>
+        </Form.Item>
+      ),
+
+      radio: (field: TemplateField, fieldName: string, rules: any) => (
+        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+          <Radio.Group>
+            {field.options?.map(option => (
+              <Radio key={option.value} value={option.value}>
+                {option.label}
+              </Radio>
+            ))}
+          </Radio.Group>
+        </Form.Item>
+      ),
+
+      group: (field: TemplateField, fieldName: string, rules: any) => (
+        <React.Fragment key={field.id}>
+          <Divider orientation="left">
+            <Space>
+              <FileTextOutlined />
+              <span>{field.label}</span>
+            </Space>
+          </Divider>
+          {field.children && renderFormFields(field.children, fieldName)}
+        </React.Fragment>
+      ),
+
+      table: (field: TemplateField, fieldName: string, rules: any) => (
+        <React.Fragment key={field.id}>
+          <Divider orientation="left">{field.label}</Divider>
+          <Form.List name={fieldName}>
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }, index) => (
+                  <React.Fragment key={key}>
+                    <Card
+                      style={{ marginBottom: 16 }}
+                      extra={
+                        <Button
+                          type="link"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => remove(name)}
+                        >
+                          删除
+                        </Button>
+                      }
+                    >
+                      <Space direction="vertical" style={{ width: '100%' }}>
+                        {field.columns?.map(column => {
+                          const columnName = `${name}.${column.name}`;
+                          const columnRules = column.required
+                            ? [{ required: true, message: `请输入${column.label}` }]
+                            : undefined;
+
+                          // 对表格列使用策略模式处理不同类型
+                          const columnRenderers = {
+                            textarea: (
+                              <Form.Item
+                                key={column.id}
+                                {...restField}
+                                name={columnName}
+                                label={column.label}
+                                rules={columnRules}
+                              >
+                                <TextArea
+                                  placeholder={column.placeholder}
+                                  autoSize={{ minRows: 3, maxRows: 6 }}
+                                />
+                              </Form.Item>
+                            ),
+
+                            text: (
+                              <Form.Item
+                                key={column.id}
+                                {...restField}
+                                name={columnName}
+                                label={column.label}
+                                rules={columnRules}
+                              >
+                                <Input placeholder={column.placeholder} />
+                              </Form.Item>
+                            ),
+                          };
+
+                          // 返回对应类型的渲染组件或默认文本输入
+                          return (
+                            columnRenderers[column.type as keyof typeof columnRenderers] ||
+                            columnRenderers.text
+                          );
+                        })}
+                      </Space>
+                    </Card>
+                    <Button
+                      type="dashed"
+                      onClick={() => add(undefined, index + 1)}
+                      block
+                      icon={<PlusOutlined />}
+                      style={{ marginBottom: 16 }}
+                    >
+                      添加{field.label}
+                    </Button>
+                  </React.Fragment>
+                ))}
+                {fields.length === 0 && (
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                    style={{ marginBottom: 16 }}
+                  >
+                    添加{field.label}
+                  </Button>
+                )}
+              </>
+            )}
+          </Form.List>
+        </React.Fragment>
+      ),
+    };
+
+    return fields.map(field => {
+      const fieldName = parentPath ? `${parentPath}.${field.name}` : field.name;
+      const rules = field.required
+        ? [{ required: true, message: `请输入${field.label}` }]
+        : undefined;
+
+      // 使用策略模式：根据字段类型选择对应的渲染函数
+      const renderer = fieldRenderers[field.type as keyof typeof fieldRenderers];
+      return renderer ? renderer(field, fieldName, rules) : null;
+    });
+  };
+
   // 表单内容
   const formContent = (
     <Card variant="borderless" className="form-container">
@@ -256,367 +303,9 @@ ${values.remark || '无'}
         layout="vertical"
         onFinish={handleFormSubmit}
         onValuesChange={handleFormValuesChange}
-        initialValues={{
-          projectName: '',
-          prdDocument: '',
-          backendDocument: '',
-          frontendDocument: '',
-          uiDocument: '',
-          smokeDoc: '',
-          frontendProjects: [],
-          backendProjects: [],
-          apolloConfig: '',
-          databaseConfig: '',
-          jobConfig: '',
-          customConfigs: [],
-          developBranch: 'feature/',
-          testBranch: 'test/',
-          productManager: '',
-          frontendDeveloper: '',
-          backendDeveloper: '',
-          tester: '',
-          attention: '',
-          remark: '',
-        }}
+        initialValues={{}}
       >
-        <Form.Item
-          name="projectName"
-          label="项目名称"
-          rules={[{ required: true, message: '请输入项目名称' }]}
-        >
-          <Input placeholder="请输入项目名称" />
-        </Form.Item>
-
-        <Divider orientation="left">
-          <Space>
-            <FileTextOutlined />
-            <span>文档</span>
-          </Space>
-        </Divider>
-
-        <Form.Item
-          name="prdDocument"
-          label="PRD原型稿"
-          rules={[{ required: true, message: '请输入PRD文档链接' }]}
-        >
-          <Input placeholder="请输入PRD文档链接" />
-        </Form.Item>
-
-        <Form.Item name="backendDocument" label="后端技术文档">
-          <Input placeholder="请输入后端技术文档链接（选填）" />
-        </Form.Item>
-
-        <Form.Item name="frontendDocument" label="前端技术文档">
-          <Input placeholder="请输入前端技术文档链接（选填）" />
-        </Form.Item>
-
-        <Form.Item name="uiDocument" label="UI稿">
-          <Input placeholder="请输入UI稿链接（选填）" />
-        </Form.Item>
-
-        <Form.Item name="smokeDoc" label="冒烟文档">
-          <Input placeholder="请输入冒烟文档链接（选填）" />
-        </Form.Item>
-
-        <Divider orientation="left">
-          <Space>
-            <FileTextOutlined />
-            <span>项目</span>
-          </Space>
-        </Divider>
-
-        <Form.List name="frontendProjects">
-          {(fields, { add, remove }) => (
-            <>
-              {fields.map(({ key, name, ...restField }, index) => (
-                <React.Fragment key={key}>
-                  <Card
-                    style={{ marginBottom: 16 }}
-                    extra={
-                      <Button
-                        type="link"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => remove(name)}
-                      >
-                        删除
-                      </Button>
-                    }
-                  >
-                    <Space direction="vertical" style={{ width: '100%' }}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'repoUrl']}
-                        label="项目名"
-                        rules={[{ required: true, message: '请输入前端项目名称' }]}
-                      >
-                        <Input placeholder="请输入前端项目名称" />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'gitUrl']}
-                        label="Git地址"
-                        rules={[{ required: true, message: '请输入前端项目Git地址' }]}
-                      >
-                        <Input placeholder="请输入前端项目Git地址" />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'jenkinsUrl']}
-                        label="Jenkins地址"
-                        rules={[{ required: true, message: '请输入前端项目Jenkins地址' }]}
-                      >
-                        <Input placeholder="请输入前端项目Jenkins地址" />
-                      </Form.Item>
-                    </Space>
-                  </Card>
-                  <Button
-                    type="dashed"
-                    onClick={() => add(undefined, index + 1)}
-                    block
-                    icon={<PlusOutlined />}
-                    style={{ marginBottom: 16 }}
-                  >
-                    添加前端项目
-                  </Button>
-                </React.Fragment>
-              ))}
-              {fields.length === 0 && (
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  block
-                  icon={<PlusOutlined />}
-                  style={{ marginBottom: 16 }}
-                >
-                  添加前端项目
-                </Button>
-              )}
-            </>
-          )}
-        </Form.List>
-
-        <Form.List name="backendProjects">
-          {(fields, { add, remove }) => (
-            <>
-              {fields.map(({ key, name, ...restField }, index) => (
-                <React.Fragment key={key}>
-                  <Card
-                    style={{ marginBottom: 16 }}
-                    extra={
-                      <Button
-                        type="link"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => remove(name)}
-                      >
-                        删除
-                      </Button>
-                    }
-                  >
-                    <Space direction="vertical" style={{ width: '100%' }}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'repoUrl']}
-                        label="项目名"
-                        rules={[{ required: true, message: '请输入后端项目名称' }]}
-                      >
-                        <Input placeholder="请输入后端项目名称" />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'gitUrl']}
-                        label="Git地址"
-                        rules={[{ required: true, message: '请输入后端项目Git地址' }]}
-                      >
-                        <Input placeholder="请输入后端项目Git地址" />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'jenkinsUrl']}
-                        label="Jenkins地址"
-                        rules={[{ required: true, message: '请输入后端项目Jenkins地址' }]}
-                      >
-                        <Input placeholder="请输入后端项目Jenkins地址" />
-                      </Form.Item>
-                    </Space>
-                  </Card>
-                  <Button
-                    type="dashed"
-                    onClick={() => add(undefined, index + 1)}
-                    block
-                    icon={<PlusOutlined />}
-                    style={{ marginBottom: 16 }}
-                  >
-                    添加后端项目
-                  </Button>
-                </React.Fragment>
-              ))}
-              {fields.length === 0 && (
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  block
-                  icon={<PlusOutlined />}
-                  style={{ marginBottom: 16 }}
-                >
-                  添加后端项目
-                </Button>
-              )}
-            </>
-          )}
-        </Form.List>
-
-        <Divider orientation="left">
-          <Space>
-            <FileTextOutlined />
-            <span>服务端配置</span>
-          </Space>
-        </Divider>
-
-        <Form.Item name="apolloConfig" label="Apollo配置">
-          <TextArea placeholder="请输入Apollo配置代码段" autoSize={{ minRows: 4, maxRows: 8 }} />
-        </Form.Item>
-
-        <Form.Item name="databaseConfig" label="数据库配置">
-          <TextArea placeholder="请输入数据库配置代码段" autoSize={{ minRows: 4, maxRows: 8 }} />
-        </Form.Item>
-
-        <Form.Item name="jobConfig" label="定时脚本&消费队列">
-          <TextArea
-            placeholder="请输入定时脚本/消费队列代码段"
-            autoSize={{ minRows: 4, maxRows: 8 }}
-          />
-        </Form.Item>
-
-        <Form.List name="customConfigs">
-          {(fields, { add, remove }) => (
-            <>
-              {fields.map(({ key, name, ...restField }, index) => (
-                <React.Fragment key={key}>
-                  <Card
-                    style={{ marginBottom: 16 }}
-                    extra={
-                      <Button
-                        type="link"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => remove(name)}
-                      >
-                        删除
-                      </Button>
-                    }
-                  >
-                    <Space direction="vertical" style={{ width: '100%' }}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'name']}
-                        label="配置名称"
-                        rules={[{ required: true, message: '请输入配置名称' }]}
-                      >
-                        <Input placeholder="请输入配置名称" />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'code']}
-                        label="配置代码"
-                        rules={[{ required: true, message: '请输入配置代码段' }]}
-                      >
-                        <TextArea
-                          placeholder="请输入配置代码段"
-                          autoSize={{ minRows: 4, maxRows: 8 }}
-                        />
-                      </Form.Item>
-                    </Space>
-                  </Card>
-                  <Button
-                    type="dashed"
-                    onClick={() => add(undefined, index + 1)}
-                    block
-                    icon={<PlusOutlined />}
-                    style={{ marginBottom: 16 }}
-                  >
-                    添加自定义配置
-                  </Button>
-                </React.Fragment>
-              ))}
-              {fields.length === 0 && (
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  block
-                  icon={<PlusOutlined />}
-                  style={{ marginBottom: 16 }}
-                >
-                  添加自定义配置
-                </Button>
-              )}
-            </>
-          )}
-        </Form.List>
-
-        <Form.Item
-          name="developBranch"
-          label="开发分支"
-          rules={[{ required: true, message: '请输入开发分支' }]}
-        >
-          <Input placeholder="如: feature/xxx" />
-        </Form.Item>
-
-        <Form.Item
-          name="testBranch"
-          label="测试分支"
-          rules={[{ required: true, message: '请输入测试分支' }]}
-        >
-          <Input placeholder="如: test/xxx" />
-        </Form.Item>
-
-        <Divider orientation="left">
-          <Space>
-            <TeamOutlined />
-            <span>项目参与人员</span>
-          </Space>
-        </Divider>
-
-        <Form.Item
-          name="productManager"
-          label="产品人员"
-          rules={[{ required: true, message: '请输入产品人员' }]}
-        >
-          <Input placeholder="产品人员姓名，多人用逗号分隔" />
-        </Form.Item>
-
-        <Form.Item
-          name="frontendDeveloper"
-          label="前端开发人员"
-          rules={[{ required: true, message: '请输入前端开发人员' }]}
-        >
-          <Input placeholder="前端开发人员姓名，多人用逗号分隔" />
-        </Form.Item>
-
-        <Form.Item
-          name="backendDeveloper"
-          label="后端开发人员"
-          rules={[{ required: true, message: '请输入后端开发人员' }]}
-        >
-          <Input placeholder="后端开发人员姓名，多人用逗号分隔" />
-        </Form.Item>
-
-        <Form.Item
-          name="tester"
-          label="测试人员"
-          rules={[{ required: true, message: '请输入测试人员' }]}
-        >
-          <Input placeholder="测试人员姓名，多人用逗号分隔" />
-        </Form.Item>
-
-        <Form.Item name="attention" label="注意事项">
-          <TextArea placeholder="需要特别注意的地方" autoSize={{ minRows: 3, maxRows: 6 }} />
-        </Form.Item>
-
-        <Form.Item name="remark" label="备注">
-          <TextArea placeholder="其他需要备注的信息" autoSize={{ minRows: 2, maxRows: 4 }} />
-        </Form.Item>
+        {renderFormFields(testReportTemplate.fields)}
       </Form>
     </Card>
   );
@@ -674,7 +363,7 @@ ${values.remark || '无'}
   return (
     <div className="container">
       <Head>
-        <title>提测文档模板 - 文档模板生成器</title>
+        <title>{testReportTemplate.name} - 文档模板生成器</title>
       </Head>
 
       <div className="page-header">
@@ -685,10 +374,10 @@ ${values.remark || '无'}
             </Button>
           </Link>
           <Title level={2} style={{ margin: 0 }}>
-            提测文档模板
+            {testReportTemplate.name}
           </Title>
         </Space>
-        <Paragraph className="description">填写以下信息，自动生成标准格式的提测文档</Paragraph>
+        <Paragraph className="description">{testReportTemplate.description}</Paragraph>
       </div>
 
       <Tabs
@@ -699,7 +388,7 @@ ${values.remark || '无'}
             form
               .validateFields()
               .then(values => {
-                const markdownContent = generateMarkdown(values);
+                const markdownContent = testReportTemplate.generateMarkdown(values);
                 setGeneratedContent(markdownContent);
                 setActiveTab(key);
               })
@@ -740,7 +429,7 @@ ${values.remark || '无'}
                   .validateFields()
                   .then(values => {
                     // 先生成文档内容再切换到预览页
-                    const markdownContent = generateMarkdown(values);
+                    const markdownContent = testReportTemplate.generateMarkdown(values);
                     setGeneratedContent(markdownContent);
                     setActiveTab('preview');
                   })
