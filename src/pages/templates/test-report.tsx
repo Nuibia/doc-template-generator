@@ -25,8 +25,7 @@ import {
 } from 'antd';
 import Head from 'next/head';
 import Link from 'next/link';
-import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import React, { useCallback, useRef, useState } from 'react';
 import testReportTemplate, { TemplateField } from '../../templates/testReport';
 
 const { Title, Paragraph } = Typography;
@@ -40,62 +39,146 @@ const TestReportPage: React.FC = () => {
   const [form] = Form.useForm<TemplateFormValues>();
   const [previewMode, setPreviewMode] = useState<'rich' | 'markdown'>('rich');
   const [generatedContent, setGeneratedContent] = useState<string>('');
+  const [generatedHtmlContent, setGeneratedHtmlContent] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('form');
+  // 初始表单数据
+  const [initialFormData, setInitialFormData] = useState<TemplateFormValues>({});
+
+  // 创建一个防抖timer引用
+  const debounceTimerRef = useRef<number | null>(null);
 
   // 从 localStorage 加载保存的数据
-  const loadSavedData = () => {
+  const loadSavedData = useCallback(() => {
     const savedData = localStorage.getItem(`${testReportTemplate.id}FormData`);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
-        form.setFieldsValue(parsedData);
-        // 加载数据后生成内容
-        const markdownContent = testReportTemplate.generateMarkdown(parsedData);
-        setGeneratedContent(markdownContent);
+        console.log('加载保存的数据:', parsedData);
+
+        // 设置初始表单数据
+        setInitialFormData(parsedData);
+
+        // 使用setTimeout确保表单已完全渲染
+        setTimeout(() => {
+          // 重置表单并设置新值
+          form.resetFields();
+          form.setFieldsValue(parsedData);
+
+          // 加载数据后生成内容
+          const markdownContent = testReportTemplate.generateMarkdown(parsedData);
+          const htmlContent = testReportTemplate.generateHtml(parsedData);
+          setGeneratedContent(markdownContent);
+          setGeneratedHtmlContent(htmlContent);
+        }, 100);
       } catch (error) {
         console.error('加载保存的数据失败:', error);
       }
     }
-  };
+  }, [form]);
 
   // 保存数据到 localStorage
-  const saveToLocalStorage = (values: TemplateFormValues) => {
+  const saveToLocalStorage = useCallback((values: TemplateFormValues) => {
     try {
+      console.log('保存数据:', values);
       localStorage.setItem(`${testReportTemplate.id}FormData`, JSON.stringify(values));
     } catch (error) {
       console.error('保存数据失败:', error);
     }
-  };
+  }, []);
 
   // 重置表单
-  const handleReset = () => {
-    form.resetFields();
-    localStorage.removeItem(`${testReportTemplate.id}FormData`);
-    setGeneratedContent('');
-  };
+  const handleReset = useCallback(() => {
+    // 确认提示
+    Modal.confirm({
+      title: '确认重置表单',
+      content: '重置将清空所有已填写的内容，确定要继续吗？',
+      okText: '确定重置',
+      cancelText: '取消',
+      onOk: () => {
+        // 清空初始数据
+        setInitialFormData({});
+        // 重置表单
+        form.resetFields();
+        // 清除本地存储
+        localStorage.removeItem(`${testReportTemplate.id}FormData`);
+        // 清空生成内容
+        setGeneratedContent('');
+        setGeneratedHtmlContent('');
+        // 提示用户
+        message.success('表单已重置');
+      },
+    });
+  }, [form]);
 
-  // 监听表单值变化
-  const handleFormValuesChange = (changedValues: any, allValues: TemplateFormValues) => {
-    const markdownContent = testReportTemplate.generateMarkdown(allValues);
-    setGeneratedContent(markdownContent);
-    // 实时保存到 localStorage
-    saveToLocalStorage(allValues);
-  };
+  // 使用防抖处理表单值变化，避免频繁更新和数据竞争
+  const handleFormValuesChange = useCallback(
+    (changedValues: any, allValues: TemplateFormValues) => {
+      // 如果已经存在计时器，清除它
+      if (debounceTimerRef.current !== null) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+
+      // 输出调试信息
+      console.log('表单值变化:', changedValues);
+
+      // 设置新的计时器，延迟处理变更
+      debounceTimerRef.current = window.setTimeout(() => {
+        console.log('处理表单值变化(防抖后):', allValues);
+
+        // 生成内容并保存
+        const markdownContent = testReportTemplate.generateMarkdown(allValues);
+        const htmlContent = testReportTemplate.generateHtml(allValues);
+        setGeneratedContent(markdownContent);
+        setGeneratedHtmlContent(htmlContent);
+        saveToLocalStorage(allValues);
+
+        // 清除计时器引用
+        debounceTimerRef.current = null;
+      }, 500); // 500ms防抖延迟
+    },
+    [saveToLocalStorage]
+  );
+
+  // 表单提交处理
+  const handleFormSubmit = useCallback(
+    (values: TemplateFormValues) => {
+      // 确保数据已正确保存
+      saveToLocalStorage(values);
+
+      // 重新生成内容 - 使用当前表单值而不是外部状态
+      form.validateFields().then(currentValues => {
+        console.log('提交表单:', currentValues);
+        const markdownContent = testReportTemplate.generateMarkdown(currentValues);
+        const htmlContent = testReportTemplate.generateHtml(currentValues);
+        setGeneratedContent(markdownContent);
+        setGeneratedHtmlContent(htmlContent);
+        // 切换到预览标签
+        setActiveTab('preview');
+      });
+    },
+    [form, saveToLocalStorage]
+  );
 
   // 组件加载时加载保存的数据
   React.useEffect(() => {
     loadSavedData();
-  }, []);
 
-  const handleFormSubmit = (values: TemplateFormValues) => {
-    setActiveTab('preview');
-  };
+    // 组件卸载时清除可能存在的计时器
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [loadSavedData]);
 
   const copyToClipboard = () => {
+    // 根据当前预览模式决定复制的内容
+    const contentToCopy = previewMode === 'rich' ? generatedHtmlContent : generatedContent;
+
     navigator.clipboard
-      .writeText(generatedContent)
+      .writeText(contentToCopy)
       .then(() => {
-        message.success('内容已复制到剪贴板');
+        message.success(`${previewMode === 'rich' ? '富文本' : 'Markdown'}内容已复制到剪贴板`);
       })
       .catch(() => {
         message.error('复制失败，请手动复制');
@@ -119,13 +202,25 @@ const TestReportPage: React.FC = () => {
     // 字段渲染策略，使用策略模式替代switch-case
     const fieldRenderers = {
       text: (field: TemplateField, fieldName: string, rules: any) => (
-        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+        <Form.Item
+          key={field.id}
+          name={fieldName}
+          label={field.label}
+          rules={rules}
+          preserve={true}
+        >
           <Input placeholder={field.placeholder} defaultValue={field.defaultValue} />
         </Form.Item>
       ),
 
       textarea: (field: TemplateField, fieldName: string, rules: any) => (
-        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+        <Form.Item
+          key={field.id}
+          name={fieldName}
+          label={field.label}
+          rules={rules}
+          preserve={true}
+        >
           <TextArea
             placeholder={field.placeholder}
             defaultValue={field.defaultValue}
@@ -135,13 +230,25 @@ const TestReportPage: React.FC = () => {
       ),
 
       date: (field: TemplateField, fieldName: string, rules: any) => (
-        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+        <Form.Item
+          key={field.id}
+          name={fieldName}
+          label={field.label}
+          rules={rules}
+          preserve={true}
+        >
           <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
         </Form.Item>
       ),
 
       select: (field: TemplateField, fieldName: string, rules: any) => (
-        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+        <Form.Item
+          key={field.id}
+          name={fieldName}
+          label={field.label}
+          rules={rules}
+          preserve={true}
+        >
           <Select placeholder={field.placeholder} defaultValue={field.defaultValue}>
             {field.options?.map(option => (
               <Option key={option.value} value={option.value}>
@@ -159,13 +266,20 @@ const TestReportPage: React.FC = () => {
           label={field.label}
           rules={rules}
           valuePropName="checked"
+          preserve={true}
         >
           <Checkbox>{field.label}</Checkbox>
         </Form.Item>
       ),
 
       radio: (field: TemplateField, fieldName: string, rules: any) => (
-        <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules}>
+        <Form.Item
+          key={field.id}
+          name={fieldName}
+          label={field.label}
+          rules={rules}
+          preserve={true}
+        >
           <Radio.Group>
             {field.options?.map(option => (
               <Radio key={option.value} value={option.value}>
@@ -194,88 +308,111 @@ const TestReportPage: React.FC = () => {
           <Form.List name={fieldName}>
             {(fields, { add, remove }) => (
               <>
-                {fields.map(({ key, name, ...restField }, index) => (
-                  <React.Fragment key={key}>
-                    <Card
-                      style={{ marginBottom: 16 }}
-                      extra={
-                        <Button
-                          type="link"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => remove(name)}
-                        >
-                          删除
-                        </Button>
-                      }
-                    >
-                      <Space direction="vertical" style={{ width: '100%' }}>
-                        {field.columns?.map(column => {
-                          const columnName = `${name}.${column.name}`;
-                          const columnRules = column.required
-                            ? [{ required: true, message: `请输入${column.label}` }]
-                            : undefined;
-
-                          // 对表格列使用策略模式处理不同类型
-                          const columnRenderers = {
-                            textarea: (
-                              <Form.Item
-                                key={column.id}
-                                {...restField}
-                                name={columnName}
-                                label={column.label}
-                                rules={columnRules}
-                              >
-                                <TextArea
-                                  placeholder={column.placeholder}
-                                  autoSize={{ minRows: 3, maxRows: 6 }}
-                                />
-                              </Form.Item>
-                            ),
-
-                            text: (
-                              <Form.Item
-                                key={column.id}
-                                {...restField}
-                                name={columnName}
-                                label={column.label}
-                                rules={columnRules}
-                              >
-                                <Input placeholder={column.placeholder} />
-                              </Form.Item>
-                            ),
-                          };
-
-                          // 返回对应类型的渲染组件或默认文本输入
-                          return (
-                            columnRenderers[column.type as keyof typeof columnRenderers] ||
-                            columnRenderers.text
-                          );
-                        })}
-                      </Space>
-                    </Card>
-                    <Button
-                      type="dashed"
-                      onClick={() => add(undefined, index + 1)}
-                      block
-                      icon={<PlusOutlined />}
-                      style={{ marginBottom: 16 }}
-                    >
-                      添加{field.label}
-                    </Button>
-                  </React.Fragment>
-                ))}
-                {fields.length === 0 && (
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
+                {fields.map(({ key, name, ...restField }) => (
+                  <Card
+                    key={key}
                     style={{ marginBottom: 16 }}
+                    title={`${field.label} #${name + 1}`}
+                    extra={
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => {
+                          // 先保存当前表单值，用于调试
+                          console.log(
+                            `删除项目前：${fieldName}[${name}]`,
+                            form.getFieldValue([fieldName, name])
+                          );
+
+                          // 执行删除
+                          remove(name);
+
+                          // 删除后用setTimeout刷新表单，确保UI正确更新
+                          setTimeout(() => {
+                            console.log(`删除项目后，表单值:`, form.getFieldsValue());
+
+                            // 更新表单内容生成
+                            const allValues = form.getFieldsValue();
+                            const markdownContent = testReportTemplate.generateMarkdown(allValues);
+                            const htmlContent = testReportTemplate.generateHtml(allValues);
+                            setGeneratedContent(markdownContent);
+                            setGeneratedHtmlContent(htmlContent);
+                            saveToLocalStorage(allValues);
+                          }, 100);
+                        }}
+                      >
+                        删除
+                      </Button>
+                    }
                   >
-                    添加{field.label}
-                  </Button>
-                )}
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                      {field.columns?.map(column => {
+                        // 构建表单项名称路径 - 使用数组而不是字符串
+                        const fieldPath = [name, column.name];
+
+                        // 生成验证规则
+                        const columnRules = column.required
+                          ? [{ required: true, message: `请输入${column.label}` }]
+                          : undefined;
+
+                        // 根据列类型渲染不同的表单控件
+                        const renderControl = () => {
+                          if (column.type === 'textarea') {
+                            return (
+                              <TextArea
+                                placeholder={column.placeholder}
+                                autoSize={{ minRows: 3, maxRows: 6 }}
+                              />
+                            );
+                          }
+                          return <Input placeholder={column.placeholder} />;
+                        };
+
+                        return (
+                          <Form.Item
+                            key={`${key}-${column.id}`}
+                            {...restField}
+                            name={fieldPath}
+                            label={column.label}
+                            rules={columnRules}
+                          >
+                            {renderControl()}
+                          </Form.Item>
+                        );
+                      })}
+                    </Space>
+                  </Card>
+                ))}
+
+                <Button
+                  type="dashed"
+                  onClick={() => {
+                    // 先保存当前表单值，用于调试
+                    console.log(`添加项目前：${fieldName}`, form.getFieldValue(fieldName));
+
+                    // 添加新项
+                    add({});
+
+                    // 添加后刷新表单，确保UI正确更新
+                    setTimeout(() => {
+                      console.log(`添加项目后，表单值:`, form.getFieldsValue());
+
+                      // 更新表单内容生成
+                      const allValues = form.getFieldsValue();
+                      const markdownContent = testReportTemplate.generateMarkdown(allValues);
+                      const htmlContent = testReportTemplate.generateHtml(allValues);
+                      setGeneratedContent(markdownContent);
+                      setGeneratedHtmlContent(htmlContent);
+                      saveToLocalStorage(allValues);
+                    }, 100);
+                  }}
+                  block
+                  icon={<PlusOutlined />}
+                  style={{ marginBottom: 16 }}
+                >
+                  添加{field.label}
+                </Button>
               </>
             )}
           </Form.List>
@@ -303,7 +440,7 @@ const TestReportPage: React.FC = () => {
         layout="vertical"
         onFinish={handleFormSubmit}
         onValuesChange={handleFormValuesChange}
-        initialValues={{}}
+        initialValues={initialFormData}
       >
         {renderFormFields(testReportTemplate.fields)}
       </Form>
@@ -336,9 +473,10 @@ const TestReportPage: React.FC = () => {
 
       <div className="preview-container">
         {previewMode === 'rich' ? (
-          <div className="markdown-content">
-            <ReactMarkdown>{generatedContent}</ReactMarkdown>
-          </div>
+          <div
+            className="html-content"
+            dangerouslySetInnerHTML={{ __html: generatedHtmlContent }}
+          />
         ) : (
           <pre style={{ whiteSpace: 'pre-wrap' }}>{generatedContent}</pre>
         )}
@@ -389,7 +527,9 @@ const TestReportPage: React.FC = () => {
               .validateFields()
               .then(values => {
                 const markdownContent = testReportTemplate.generateMarkdown(values);
+                const htmlContent = testReportTemplate.generateHtml(values);
                 setGeneratedContent(markdownContent);
+                setGeneratedHtmlContent(htmlContent);
                 setActiveTab(key);
               })
               .catch(() => {
@@ -428,9 +568,12 @@ const TestReportPage: React.FC = () => {
                 form
                   .validateFields()
                   .then(values => {
+                    console.log('values', values);
                     // 先生成文档内容再切换到预览页
                     const markdownContent = testReportTemplate.generateMarkdown(values);
+                    const htmlContent = testReportTemplate.generateHtml(values);
                     setGeneratedContent(markdownContent);
+                    setGeneratedHtmlContent(htmlContent);
                     setActiveTab('preview');
                   })
                   .catch(() => message.error('请填写必填项'));
