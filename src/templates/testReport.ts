@@ -113,6 +113,14 @@ const testReportTemplate: TestReportTemplate = {
               required: true,
             },
             {
+              id: 'repoBranch',
+              name: 'repoBranch',
+              type: 'text',
+              label: '分支',
+              placeholder: '请输入项目分支，如: master',
+              required: false,
+            },
+            {
               id: 'jenkinsUrl',
               name: 'jenkinsUrl',
               type: 'text',
@@ -144,6 +152,14 @@ const testReportTemplate: TestReportTemplate = {
               label: 'Git地址',
               placeholder: '请输入后端项目Git地址',
               required: true,
+            },
+            {
+              id: 'repoBranch',
+              name: 'repoBranch',
+              type: 'text',
+              label: '分支',
+              placeholder: '请输入项目分支，如: master',
+              required: false,
             },
             {
               id: 'jenkinsUrl',
@@ -219,18 +235,18 @@ const testReportTemplate: TestReportTemplate = {
       name: 'developBranch',
       type: 'text',
       label: '开发分支',
-      placeholder: '如: feature/xxx',
-      defaultValue: 'feature/',
-      required: true,
+      placeholder: '请输入开发分支，如: feature/xxx',
+      defaultValue: '',
+      required: false,
     },
     {
       id: 'testBranch',
       name: 'testBranch',
       type: 'text',
       label: '测试分支',
-      placeholder: '如: test/xxx',
-      defaultValue: 'test/',
-      required: true,
+      placeholder: '请输入测试分支，如: test/xxx',
+      defaultValue: '',
+      required: false,
     },
     {
       id: 'projectMembers',
@@ -318,9 +334,9 @@ const testReportTemplate: TestReportTemplate = {
     let frontendTable = '';
     if (frontendProjects.length > 0) {
       frontendTable = `
-项目名 | Git地址 | Jenkins地址
--------|--------|-------------
-${frontendProjects.map(p => `${p.repoUrl || ''} | ${p.gitUrl || ''} | ${p.jenkinsUrl || ''}`).join('\n')}
+项目名 | Git地址 | 分支 | Jenkins地址
+-------|--------|------|-------------
+${frontendProjects.map(p => `${p.repoUrl || ''} | ${p.gitUrl || ''} | ${p.repoBranch || ''} | ${p.jenkinsUrl || ''}`).join('\n')}
 `;
     }
 
@@ -328,9 +344,9 @@ ${frontendProjects.map(p => `${p.repoUrl || ''} | ${p.gitUrl || ''} | ${p.jenkin
     let backendTable = '';
     if (backendProjects.length > 0) {
       backendTable = `
-项目名 | Git地址 | Jenkins地址
--------|--------|-------------
-${backendProjects.map(p => `${p.repoUrl || ''} | ${p.gitUrl || ''} | ${p.jenkinsUrl || ''}`).join('\n')}
+项目名 | Git地址 | 分支 | Jenkins地址
+-------|--------|------|-------------
+${backendProjects.map(p => `${p.repoUrl || ''} | ${p.gitUrl || ''} | ${p.repoBranch || ''} | ${p.jenkinsUrl || ''}`).join('\n')}
 `;
     }
 
@@ -398,8 +414,8 @@ ${values['serverConfigs.jobConfig']}
 
 ${customConfigs.length > 0 ? '### 自定义配置' + customConfigsMarkdown : ''}
 
-- **开发分支**: ${values.developBranch}
-- **测试分支**: ${values.testBranch}
+${values.developBranch ? `- **开发分支**: ${values.developBranch}` : ''}
+${values.testBranch ? `- **测试分支**: ${values.testBranch}` : ''}
 
 ## 项目参与人员
 
@@ -452,6 +468,7 @@ ${values.remark || '无'}
     <tr style="background-color: #f2f2f2;">
       <th>项目名</th>
       <th>Git地址</th>
+      <th>分支</th>
       <th>Jenkins地址</th>
     </tr>
   </thead>
@@ -462,6 +479,7 @@ ${values.remark || '无'}
     <tr>
       <td>${p.repoUrl || ''}</td>
       <td>${p.gitUrl || ''}</td>
+      <td>${p.repoBranch || ''}</td>
       <td>${p.jenkinsUrl || ''}</td>
     </tr>`
       )
@@ -480,6 +498,7 @@ ${values.remark || '无'}
     <tr style="background-color: #f2f2f2;">
       <th>项目名</th>
       <th>Git地址</th>
+      <th>分支</th>
       <th>Jenkins地址</th>
     </tr>
   </thead>
@@ -490,6 +509,7 @@ ${values.remark || '无'}
     <tr>
       <td>${p.repoUrl || ''}</td>
       <td>${p.gitUrl || ''}</td>
+      <td>${p.repoBranch || ''}</td>
       <td>${p.jenkinsUrl || ''}</td>
     </tr>`
       )
@@ -564,8 +584,8 @@ ${
 ${customConfigs.length > 0 ? `<h3>自定义配置</h3>${customConfigsHtml}` : ''}
 
 <ul>
-  <li><strong>开发分支</strong>: ${values.developBranch}</li>
-  <li><strong>测试分支</strong>: ${values.testBranch}</li>
+  ${values.developBranch ? `<li><strong>开发分支</strong>: ${values.developBranch}</li>` : ''}
+  ${values.testBranch ? `<li><strong>测试分支</strong>: ${values.testBranch}</li>` : ''}
 </ul>
 
 <h2>项目参与人员</h2>
