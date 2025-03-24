@@ -5,6 +5,7 @@ import {
   ExportOutlined,
   EyeOutlined,
   FileTextOutlined,
+  FileWordOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
 import {
@@ -195,6 +196,73 @@ const TestReportPage: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  // 导出为DOC文件
+  const exportToDoc = () => {
+    // 创建一个完整的HTML文档
+    let docContent = '';
+
+    if (previewMode === 'rich') {
+      // 使用富文本内容
+      docContent = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${form.getFieldValue('projectName')}-提测文档</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ddd; padding: 8px; }
+  th { background-color: #f2f2f2; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 16px; }
+  pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; }
+</style>
+</head>
+<body>
+${generatedHtmlContent}
+</body>
+</html>`;
+    } else {
+      // 在Markdown模式下，使用已转换好的HTML内容而不是原始Markdown
+      docContent = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${form.getFieldValue('projectName')}-提测文档</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ddd; padding: 8px; }
+  th { background-color: #f2f2f2; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 16px; }
+  pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; }
+</style>
+</head>
+<body>
+${generatedHtmlContent}
+</body>
+</html>`;
+    }
+
+    // 创建Blob并下载
+    const blob = new Blob([docContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${form.getFieldValue('projectName')}-提测文档.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    message.success('已导出Word文档');
   };
 
   // 动态渲染表单字段
@@ -462,12 +530,21 @@ const TestReportPage: React.FC = () => {
         </Radio.Group>
 
         <Space style={{ float: 'right' }}>
-          <Button icon={<CopyOutlined />} onClick={copyToClipboard}>
-            复制到剪贴板
-          </Button>
-          <Button type="primary" icon={<ExportOutlined />} onClick={exportToMarkdown}>
-            导出Markdown
-          </Button>
+          {previewMode === 'markdown' && (
+            <>
+              <Button icon={<CopyOutlined />} onClick={copyToClipboard}>
+                复制到剪贴板
+              </Button>
+              <Button type="primary" icon={<ExportOutlined />} onClick={exportToMarkdown}>
+                导出Markdown
+              </Button>
+            </>
+          )}
+          {previewMode === 'rich' && (
+            <Button type="primary" icon={<FileWordOutlined />} onClick={exportToDoc}>
+              导出Word
+            </Button>
+          )}
         </Space>
       </div>
 
