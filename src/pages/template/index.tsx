@@ -12,7 +12,6 @@ import {
   Button,
   Card,
   Checkbox,
-  DatePicker,
   Divider,
   Form,
   Input,
@@ -26,17 +25,29 @@ import {
 } from 'antd';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React, { useCallback, useRef, useState } from 'react';
+import releasePlanTemplate from '../../templates/releasePlan';
 import testReportTemplate, { TemplateField } from '../../templates/testReport';
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
+// 模板映射
+const templateMap = {
+  'test-report': testReportTemplate,
+  'release-plan': releasePlanTemplate,
+};
+
 // 将表单值类型定义为Record<string, any>以便与模板定义匹配
 type TemplateFormValues = Record<string, any>;
 
-const TestReportPage: React.FC = () => {
+const TemplatePage: React.FC = () => {
+  const router = useRouter();
+  const { id = 'test-report' } = router.query; // 默认使用test-report模板
+  const template = templateMap[id as keyof typeof templateMap] || testReportTemplate;
+
   const [form] = Form.useForm<TemplateFormValues>();
   const [previewMode, setPreviewMode] = useState<'rich' | 'markdown'>('rich');
   const [generatedContent, setGeneratedContent] = useState<string>('');
@@ -50,7 +61,7 @@ const TestReportPage: React.FC = () => {
 
   // 从 localStorage 加载保存的数据
   const loadSavedData = useCallback(() => {
-    const savedData = localStorage.getItem(`${testReportTemplate.id}FormData`);
+    const savedData = localStorage.getItem(`${template.id}_${previewMode}`);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
@@ -66,8 +77,8 @@ const TestReportPage: React.FC = () => {
           form.setFieldsValue(parsedData);
 
           // 加载数据后生成内容
-          const markdownContent = testReportTemplate.generateMarkdown(parsedData);
-          const htmlContent = testReportTemplate.generateHtml(parsedData);
+          const markdownContent = template.generateMarkdown(parsedData);
+          const htmlContent = template.generateHtml(parsedData);
           setGeneratedContent(markdownContent);
           setGeneratedHtmlContent(htmlContent);
         }, 100);
@@ -75,17 +86,20 @@ const TestReportPage: React.FC = () => {
         console.error('加载保存的数据失败:', error);
       }
     }
-  }, [form]);
+  }, [form, template, previewMode]);
 
   // 保存数据到 localStorage
-  const saveToLocalStorage = useCallback((values: TemplateFormValues) => {
-    try {
-      console.log('保存数据:', values);
-      localStorage.setItem(`${testReportTemplate.id}FormData`, JSON.stringify(values));
-    } catch (error) {
-      console.error('保存数据失败:', error);
-    }
-  }, []);
+  const saveToLocalStorage = useCallback(
+    (values: TemplateFormValues) => {
+      try {
+        console.log('保存数据:', values);
+        localStorage.setItem(`${template.id}_${previewMode}`, JSON.stringify(values));
+      } catch (error) {
+        console.error('保存数据失败:', error);
+      }
+    },
+    [template, previewMode]
+  );
 
   // 重置表单
   const handleReset = useCallback(() => {
@@ -101,7 +115,8 @@ const TestReportPage: React.FC = () => {
         // 重置表单
         form.resetFields();
         // 清除本地存储
-        localStorage.removeItem(`${testReportTemplate.id}FormData`);
+        localStorage.removeItem(`${template.id}_rich`);
+        localStorage.removeItem(`${template.id}_markdown`);
         // 清空生成内容
         setGeneratedContent('');
         setGeneratedHtmlContent('');
@@ -109,7 +124,7 @@ const TestReportPage: React.FC = () => {
         message.success('表单已重置');
       },
     });
-  }, [form]);
+  }, [form, template]);
 
   // 使用防抖处理表单值变化，避免频繁更新和数据竞争
   const handleFormValuesChange = useCallback(
@@ -127,8 +142,8 @@ const TestReportPage: React.FC = () => {
         console.log('处理表单值变化(防抖后):', allValues);
 
         // 生成内容并保存
-        const markdownContent = testReportTemplate.generateMarkdown(allValues);
-        const htmlContent = testReportTemplate.generateHtml(allValues);
+        const markdownContent = template.generateMarkdown(allValues);
+        const htmlContent = template.generateHtml(allValues);
         setGeneratedContent(markdownContent);
         setGeneratedHtmlContent(htmlContent);
         saveToLocalStorage(allValues);
@@ -149,8 +164,8 @@ const TestReportPage: React.FC = () => {
       // 重新生成内容 - 使用当前表单值而不是外部状态
       form.validateFields().then(currentValues => {
         console.log('提交表单:', currentValues);
-        const markdownContent = testReportTemplate.generateMarkdown(currentValues);
-        const htmlContent = testReportTemplate.generateHtml(currentValues);
+        const markdownContent = template.generateMarkdown(currentValues);
+        const htmlContent = template.generateHtml(currentValues);
         setGeneratedContent(markdownContent);
         setGeneratedHtmlContent(htmlContent);
         // 切换到预览标签
@@ -297,18 +312,6 @@ ${generatedHtmlContent}
         </Form.Item>
       ),
 
-      date: (field: TemplateField, fieldName: string, rules: any) => (
-        <Form.Item
-          key={field.id}
-          name={fieldName}
-          label={field.label}
-          rules={rules}
-          preserve={true}
-        >
-          <DatePicker format="YYYY-MM-DD" style={{ width: '100%' }} />
-        </Form.Item>
-      ),
-
       select: (field: TemplateField, fieldName: string, rules: any) => (
         <Form.Item
           key={field.id}
@@ -402,8 +405,8 @@ ${generatedHtmlContent}
 
                             // 更新表单内容生成
                             const allValues = form.getFieldsValue();
-                            const markdownContent = testReportTemplate.generateMarkdown(allValues);
-                            const htmlContent = testReportTemplate.generateHtml(allValues);
+                            const markdownContent = template.generateMarkdown(allValues);
+                            const htmlContent = template.generateHtml(allValues);
                             setGeneratedContent(markdownContent);
                             setGeneratedHtmlContent(htmlContent);
                             saveToLocalStorage(allValues);
@@ -468,8 +471,8 @@ ${generatedHtmlContent}
 
                       // 更新表单内容生成
                       const allValues = form.getFieldsValue();
-                      const markdownContent = testReportTemplate.generateMarkdown(allValues);
-                      const htmlContent = testReportTemplate.generateHtml(allValues);
+                      const markdownContent = template.generateMarkdown(allValues);
+                      const htmlContent = template.generateHtml(allValues);
                       setGeneratedContent(markdownContent);
                       setGeneratedHtmlContent(htmlContent);
                       saveToLocalStorage(allValues);
@@ -510,7 +513,7 @@ ${generatedHtmlContent}
         onValuesChange={handleFormValuesChange}
         initialValues={initialFormData}
       >
-        {renderFormFields(testReportTemplate.fields)}
+        {renderFormFields(template.fields)}
       </Form>
     </Card>
   );
@@ -578,7 +581,7 @@ ${generatedHtmlContent}
   return (
     <div className="container">
       <Head>
-        <title>{testReportTemplate.name} - 文档模板生成器</title>
+        <title>{template.name} - 文档模板生成器</title>
       </Head>
 
       <div className="page-header">
@@ -589,10 +592,10 @@ ${generatedHtmlContent}
             </Button>
           </Link>
           <Title level={2} style={{ margin: 0 }}>
-            {testReportTemplate.name}
+            {template.name}
           </Title>
         </Space>
-        <Paragraph className="description">{testReportTemplate.description}</Paragraph>
+        <Paragraph className="description">{template.description}</Paragraph>
       </div>
 
       <Tabs
@@ -603,8 +606,8 @@ ${generatedHtmlContent}
             form
               .validateFields()
               .then(values => {
-                const markdownContent = testReportTemplate.generateMarkdown(values);
-                const htmlContent = testReportTemplate.generateHtml(values);
+                const markdownContent = template.generateMarkdown(values);
+                const htmlContent = template.generateHtml(values);
                 setGeneratedContent(markdownContent);
                 setGeneratedHtmlContent(htmlContent);
                 setActiveTab(key);
@@ -647,8 +650,8 @@ ${generatedHtmlContent}
                   .then(values => {
                     console.log('values', values);
                     // 先生成文档内容再切换到预览页
-                    const markdownContent = testReportTemplate.generateMarkdown(values);
-                    const htmlContent = testReportTemplate.generateHtml(values);
+                    const markdownContent = template.generateMarkdown(values);
+                    const htmlContent = template.generateHtml(values);
                     setGeneratedContent(markdownContent);
                     setGeneratedHtmlContent(htmlContent);
                     setActiveTab('preview');
@@ -679,4 +682,4 @@ ${generatedHtmlContent}
   );
 };
 
-export default TestReportPage;
+export default TemplatePage;

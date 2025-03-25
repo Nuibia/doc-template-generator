@@ -1,8 +1,8 @@
-import React from 'react';
-import { Button, Typography, Card, Space } from 'antd';
-import { FileTextOutlined, FileMarkdownOutlined } from '@ant-design/icons';
-import Link from 'next/link';
+import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
+import { Button, Card, Space, Typography } from 'antd';
 import Head from 'next/head';
+import Link from 'next/link';
+import React from 'react';
 
 const { Title, Paragraph } = Typography;
 
@@ -16,9 +16,7 @@ const HomePage: React.FC = () => {
 
       <div className="page-header">
         <Title level={1}>文档模板生成器</Title>
-        <Paragraph className="description">
-          通过自定义表单生成富文本和Markdown文档，支持多种平台导出
-        </Paragraph>
+        <Paragraph className="description">通过自定义表单生成富文本和Markdown文档</Paragraph>
       </div>
 
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -46,7 +44,7 @@ const HomePage: React.FC = () => {
                 description="标准提测文档模板，包含版本、功能点、测试范围等"
               />
               <div style={{ marginTop: 16 }}>
-                <Link href="/templates/test-report" passHref>
+                <Link href="/template?id=test-report" passHref>
                   <Button type="primary">使用此模板</Button>
                 </Link>
               </div>
@@ -74,20 +72,20 @@ const HomePage: React.FC = () => {
                 description="详细的发布计划文档，包含发布时间、功能列表、风险评估等"
               />
               <div style={{ marginTop: 16 }}>
-                <Link href="/templates/release-plan" passHref>
+                <Link href="/template?id=release-plan" passHref>
                   <Button type="primary">使用此模板</Button>
                 </Link>
               </div>
             </Card>
           </Space>
         </Card>
-
-        <Card title="自定义模板" variant="borderless">
+        {/* TODO: 未来支持自定义模板 */}
+        {/* <Card title="自定义模板" variant="borderless">
           <Paragraph>创建自定义的文档模板，定义表单字段和输出格式</Paragraph>
-          <Link href="/templates/custom" passHref>
+          <Link href="/template?id=custom" passHref>
             <Button type="primary">创建自定义模板</Button>
           </Link>
-        </Card>
+        </Card> */}
       </Space>
     </div>
   );

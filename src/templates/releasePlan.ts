@@ -8,6 +8,7 @@ export interface ReleasePlanTemplate {
   description: string;
   fields: TemplateField[];
   generateMarkdown: (values: Record<string, any>) => string;
+  generateHtml: (values: Record<string, any>) => string;
 }
 
 const releasePlanTemplate: ReleasePlanTemplate = {
@@ -34,8 +35,9 @@ const releasePlanTemplate: ReleasePlanTemplate = {
     {
       id: 'releaseDate',
       name: 'releaseDate',
-      type: 'date',
+      type: 'text',
       label: '计划发布日期',
+      placeholder: '如: 2024-03-25',
       required: true,
     },
     {
@@ -171,6 +173,46 @@ ${values.riskAssessment}
 ${values.postReleaseMonitoring ? `## 发布后监控\n\n${values.postReleaseMonitoring}` : ''}
 
 ${values.remarks ? `## 备注\n\n${values.remarks}` : ''}
+`;
+  },
+  generateHtml: (values: Record<string, any>): string => {
+    return `
+<h1>${values.projectName} 发布计划</h1>
+
+<h2>基本信息</h2>
+
+<ul>
+  <li><strong>项目名称</strong>: ${values.projectName}</li>
+  <li><strong>版本号</strong>: ${values.version}</li>
+  <li><strong>计划发布日期</strong>: ${values.releaseDate}</li>
+  <li><strong>发布时间</strong>: ${values.releaseTime}</li>
+  <li><strong>发布负责人</strong>: ${values.releaseManager}</li>
+  <li><strong>开发人员</strong>: ${values.developers}</li>
+  <li><strong>测试人员</strong>: ${values.testers}</li>
+  <li><strong>发布分支</strong>: ${values.releaseBranch}</li>
+</ul>
+
+<h2>功能列表</h2>
+
+<div>${values.featureList}</div>
+
+${values.bugfixList ? `<h2>Bugfix列表</h2><div>${values.bugfixList}</div>` : ''}
+
+<h2>发布计划步骤</h2>
+
+<div>${values.releasePlan}</div>
+
+<h2>回滚计划</h2>
+
+<div>${values.rollbackPlan}</div>
+
+<h2>风险评估</h2>
+
+<div>${values.riskAssessment}</div>
+
+${values.postReleaseMonitoring ? `<h2>发布后监控</h2><div>${values.postReleaseMonitoring}</div>` : ''}
+
+${values.remarks ? `<h2>备注</h2><div>${values.remarks}</div>` : ''}
 `;
   },
 };

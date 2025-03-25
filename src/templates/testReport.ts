@@ -12,7 +12,7 @@ export interface TestReportTemplate {
 export interface TemplateField {
   id: string;
   name: string;
-  type: 'text' | 'textarea' | 'date' | 'select' | 'radio' | 'checkbox' | 'group' | 'table';
+  type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'group' | 'table';
   label: string;
   placeholder?: string;
   required?: boolean;
