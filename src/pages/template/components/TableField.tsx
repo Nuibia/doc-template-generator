@@ -1,17 +1,21 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Divider, Form, Input, Space } from 'antd';
+import type { FormListFieldData, FormListOperation } from 'antd/es/form/FormList';
 import React from 'react';
-import { TemplateField } from '../types';
+import { FormInstance, Template, TemplateField, TemplateFormValues } from '../types';
 
 const { TextArea } = Input;
 
 interface TableFieldProps {
   field: TemplateField;
   fieldName: string;
-  form: any;
-  template: any;
-  onValuesChange: (changedValues: any, allValues: any) => void;
-  saveToLocalStorage: (values: any) => void;
+  form: FormInstance;
+  template: Template;
+  onValuesChange: (
+    changedValues: Partial<TemplateFormValues>,
+    allValues: TemplateFormValues
+  ) => void;
+  saveToLocalStorage: (values: TemplateFormValues) => void;
   setGeneratedContent: (content: string) => void;
   setGeneratedHtmlContent: (content: string) => void;
 }
@@ -21,6 +25,7 @@ const TableField: React.FC<TableFieldProps> = ({
   fieldName,
   form,
   template,
+  onValuesChange,
   saveToLocalStorage,
   setGeneratedContent,
   setGeneratedHtmlContent,
@@ -29,7 +34,7 @@ const TableField: React.FC<TableFieldProps> = ({
     <React.Fragment>
       <Divider orientation="left">{field.label}</Divider>
       <Form.List name={fieldName}>
-        {(fields, { add, remove }) => (
+        {(fields: FormListFieldData[], { add, remove }: FormListOperation) => (
           <>
             {fields.map(({ key, name, ...restField }) => (
               <Card
@@ -59,7 +64,7 @@ const TableField: React.FC<TableFieldProps> = ({
               >
                 <Space direction="vertical" style={{ width: '100%' }}>
                   {field.columns?.map(column => {
-                    const fieldPath = [name, column.name];
+                    const fieldPath = [name, column.name] as [number, string];
                     const columnRules = column.required
                       ? [{ required: true, message: `请输入${column.label}` }]
                       : undefined;

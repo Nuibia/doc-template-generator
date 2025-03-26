@@ -1,4 +1,9 @@
-export type TemplateFormValues = Record<string, any>;
+export type TemplateFormValues = Record<string, unknown>;
+
+export interface TemplateFieldOption {
+  label: string;
+  value: string | number;
+}
 
 export interface TemplateField {
   id: string;
@@ -6,12 +11,25 @@ export interface TemplateField {
   label: string;
   type: string;
   placeholder?: string;
-  defaultValue?: any;
+  defaultValue?: unknown;
   required?: boolean;
-  options?: Array<{
-    label: string;
-    value: string | number;
-  }>;
+  options?: TemplateFieldOption[];
   children?: TemplateField[];
   columns?: TemplateField[];
+}
+
+export interface FormInstance<T = TemplateFormValues> {
+  getFieldValue: (name: string) => unknown;
+  getFieldsValue: (nameList?: string[]) => T;
+  resetFields: (fields?: string[]) => void;
+  setFieldsValue: (values: Partial<T>) => void;
+  validateFields: () => Promise<T>;
+}
+
+export interface Template {
+  name: string;
+  description: string;
+  fields: TemplateField[];
+  generateMarkdown: (values: TemplateFormValues) => string;
+  generateHtml: (values: TemplateFormValues) => string;
 }

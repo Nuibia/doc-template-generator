@@ -1,7 +1,8 @@
 import { FileTextOutlined } from '@ant-design/icons';
 import { Checkbox, Divider, Form, Input, Radio, Select, Space } from 'antd';
+import { Rule } from 'antd/es/form';
 import React from 'react';
-import { TemplateField } from '../types';
+import { FormInstance, Template, TemplateField, TemplateFormValues } from '../types';
 import TableField from './TableField';
 
 const { TextArea } = Input;
@@ -10,13 +11,22 @@ const { Option } = Select;
 interface FormFieldsProps {
   fields: TemplateField[];
   parentPath?: string;
-  form: any;
-  template: any;
-  onValuesChange: (changedValues: any, allValues: any) => void;
-  saveToLocalStorage: (values: any) => void;
+  form: FormInstance;
+  template: Template;
+  onValuesChange: (
+    changedValues: Partial<TemplateFormValues>,
+    allValues: TemplateFormValues
+  ) => void;
+  saveToLocalStorage: (values: TemplateFormValues) => void;
   setGeneratedContent: (content: string) => void;
   setGeneratedHtmlContent: (content: string) => void;
 }
+
+type FieldRenderer = (
+  field: TemplateField,
+  fieldName: string,
+  rules: Rule[] | undefined
+) => React.ReactNode;
 
 const FormFields: React.FC<FormFieldsProps> = ({
   fields,
@@ -28,26 +38,29 @@ const FormFields: React.FC<FormFieldsProps> = ({
   setGeneratedContent,
   setGeneratedHtmlContent,
 }) => {
-  const fieldRenderers = {
-    text: (field: TemplateField, fieldName: string, rules: any) => (
+  const fieldRenderers: Record<string, FieldRenderer> = {
+    text: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>
-        <Input placeholder={field.placeholder} defaultValue={field.defaultValue} />
+        <Input placeholder={field.placeholder} defaultValue={field.defaultValue as string} />
       </Form.Item>
     ),
 
-    textarea: (field: TemplateField, fieldName: string, rules: any) => (
+    textarea: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>
         <TextArea
           placeholder={field.placeholder}
-          defaultValue={field.defaultValue}
+          defaultValue={field.defaultValue as string}
           autoSize={{ minRows: 3, maxRows: 6 }}
         />
       </Form.Item>
     ),
 
-    select: (field: TemplateField, fieldName: string, rules: any) => (
+    select: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>
-        <Select placeholder={field.placeholder} defaultValue={field.defaultValue}>
+        <Select
+          placeholder={field.placeholder}
+          defaultValue={field.defaultValue as string | number}
+        >
           {field.options?.map(option => (
             <Option key={option.value} value={option.value}>
               {option.label}
@@ -57,7 +70,7 @@ const FormFields: React.FC<FormFieldsProps> = ({
       </Form.Item>
     ),
 
-    checkbox: (field: TemplateField, fieldName: string, rules: any) => (
+    checkbox: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item
         key={field.id}
         name={fieldName}
@@ -70,7 +83,7 @@ const FormFields: React.FC<FormFieldsProps> = ({
       </Form.Item>
     ),
 
-    radio: (field: TemplateField, fieldName: string, rules: any) => (
+    radio: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>
         <Radio.Group>
           {field.options?.map(option => (

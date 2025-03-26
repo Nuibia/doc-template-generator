@@ -1,8 +1,8 @@
 import { Form, message } from 'antd';
 import { useCallback, useRef, useState } from 'react';
-import { TemplateFormValues } from '../types';
+import { Template, TemplateFormValues } from '../types';
 
-export const useTemplateForm = (template: any) => {
+export const useTemplateForm = (template: Template) => {
   const [form] = Form.useForm<TemplateFormValues>();
   const [previewMode, setPreviewMode] = useState<'rich' | 'markdown'>('rich');
   const [generatedContent, setGeneratedContent] = useState<string>('');
@@ -12,10 +12,11 @@ export const useTemplateForm = (template: any) => {
   const debounceTimerRef = useRef<number | null>(null);
 
   const loadSavedData = useCallback(() => {
-    const savedData = localStorage.getItem(`${template.id}_${previewMode}`);
+    const templateId = template.name.toLowerCase().replace(/\s+/g, '-');
+    const savedData = localStorage.getItem(`${templateId}_${previewMode}`);
     if (savedData) {
       try {
-        const parsedData = JSON.parse(savedData);
+        const parsedData = JSON.parse(savedData) as TemplateFormValues;
         setInitialFormData(parsedData);
         setTimeout(() => {
           form.resetFields();
@@ -34,7 +35,8 @@ export const useTemplateForm = (template: any) => {
   const saveToLocalStorage = useCallback(
     (values: TemplateFormValues) => {
       try {
-        localStorage.setItem(`${template.id}_${previewMode}`, JSON.stringify(values));
+        const templateId = template.name.toLowerCase().replace(/\s+/g, '-');
+        localStorage.setItem(`${templateId}_${previewMode}`, JSON.stringify(values));
       } catch (error) {
         console.error('保存数据失败:', error);
       }
@@ -45,15 +47,16 @@ export const useTemplateForm = (template: any) => {
   const handleReset = useCallback(() => {
     setInitialFormData({});
     form.resetFields();
-    localStorage.removeItem(`${template.id}_rich`);
-    localStorage.removeItem(`${template.id}_markdown`);
+    const templateId = template.name.toLowerCase().replace(/\s+/g, '-');
+    localStorage.removeItem(`${templateId}_rich`);
+    localStorage.removeItem(`${templateId}_markdown`);
     setGeneratedContent('');
     setGeneratedHtmlContent('');
     message.success('表单已重置');
   }, [form, template]);
 
   const handleFormValuesChange = useCallback(
-    (changedValues: any, allValues: TemplateFormValues) => {
+    (changedValues: Partial<TemplateFormValues>, allValues: TemplateFormValues) => {
       if (debounceTimerRef.current !== null) {
         window.clearTimeout(debounceTimerRef.current);
       }
