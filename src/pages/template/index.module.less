@@ -1,0 +1,74 @@
+.container {
+  padding: 24px;
+  padding-top: 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #fff;
+  padding: 16px 24px 16px 64px;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  .description {
+    margin-top: 8px;
+    color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 0;
+  }
+}
+
+.formContainer {
+  margin-bottom: 24px;
+  padding-left: 64px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.previewHeader {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .previewModeSelector {
+    margin-bottom: 16px;
+  }
+
+  .previewActions {
+    float: right;
+  }
+}
+
+.previewContainer {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 4px;
+
+  .htmlContent {
+    min-height: 200px;
+  }
+
+  .markdownContent {
+    min-height: 200px;
+  }
+}
+
+.floatingButtons {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #fff;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 0 8px 8px 0;
+  z-index: 1000;
+}
