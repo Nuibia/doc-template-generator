@@ -29,7 +29,7 @@ type FieldRenderer = (
 ) => React.ReactNode;
 
 const FormFields: React.FC<FormFieldsProps> = ({
-  fields,
+  fields = [],
   parentPath = '',
   form,
   template,
@@ -38,6 +38,11 @@ const FormFields: React.FC<FormFieldsProps> = ({
   setGeneratedContent,
   setGeneratedHtmlContent,
 }) => {
+  // 安全检查
+  if (!fields || !form || !template) {
+    return null;
+  }
+
   const fieldRenderers: Record<string, FieldRenderer> = {
     text: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>

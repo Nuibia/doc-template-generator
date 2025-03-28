@@ -33,3 +33,7 @@ export interface Template {
   generateMarkdown: (values: TemplateFormValues) => string;
   generateHtml: (values: TemplateFormValues) => string;
 }
+
+// 添加默认导出，解决Next.js构建优化错误
+const DefaultComponent = () => null;
+export default DefaultComponent;

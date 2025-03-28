@@ -30,6 +30,11 @@ const TableField: React.FC<TableFieldProps> = ({
   setGeneratedContent,
   setGeneratedHtmlContent,
 }) => {
+  // 安全检查
+  if (!field || !fieldName || !form || !template) {
+    return null;
+  }
+
   return (
     <React.Fragment>
       <Divider orientation="left">{field.label}</Divider>

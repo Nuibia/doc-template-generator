@@ -90,3 +90,7 @@ export const useTemplateForm = (template: Template) => {
     handleFormValuesChange,
   };
 };
+
+// 添加默认导出，解决Next.js构建优化错误
+const DefaultComponent = () => null;
+export default DefaultComponent;
