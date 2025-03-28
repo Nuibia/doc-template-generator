@@ -1,0 +1,127 @@
+.templateCard {
+  width: 280px;
+  height: 360px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.templateCard:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.templateCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.templateCard:hover::before {
+  opacity: 1;
+}
+
+.templateCard::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  top: -50%;
+  left: -50%;
+  transform: rotate(25deg);
+  transition: all 0.7s;
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.templateCard:hover::after {
+  animation: shine 1.2s forwards;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+    opacity: 0.6;
+  }
+
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.cardCover {
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cardCover svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.templateCard:hover .cardCover {
+  background-color: #e8e8e8;
+}
+
+.templateCard:hover .cardCover svg {
+  transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+  color: #1890ff;
+}
+
+.cardContent {
+  padding: 16px;
+  flex-grow: 1;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.cardDescription {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cardAction {
+  margin-top: 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+  padding-bottom: 16px;
+}
+
+.templateCard:hover .cardAction {
+  transform: translateY(-5px);
+}

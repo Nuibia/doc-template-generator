@@ -1,8 +1,8 @@
 import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
-import { Button, Card, Space, Typography } from 'antd';
+import { Card, Space, Typography } from 'antd';
 import Head from 'next/head';
-import Link from 'next/link';
 import React from 'react';
+import { TemplateCard, TemplateCardContainer } from '../components';
 
 const { Title, Paragraph } = Typography;
 
@@ -21,63 +21,21 @@ const HomePage: React.FC = () => {
 
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Card title="内置模板" variant="borderless">
-          <Space size="large">
-            <Card
-              hoverable
-              style={{ width: 240 }}
-              cover={
-                <div
-                  style={{
-                    height: 160,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: '#f5f5f5',
-                  }}
-                >
-                  <FileTextOutlined style={{ fontSize: 64 }} />
-                </div>
-              }
-            >
-              <Card.Meta
-                title="提测文档"
-                description="标准提测文档模板，包含版本、功能点、测试范围等"
-              />
-              <div style={{ marginTop: 16 }}>
-                <Link href="/template?id=test-report" passHref>
-                  <Button type="primary">使用此模板</Button>
-                </Link>
-              </div>
-            </Card>
+          <TemplateCardContainer>
+            <TemplateCard
+              icon={<FileTextOutlined style={{ fontSize: 64 }} />}
+              title="提测文档"
+              description="标准提测文档模板，包含版本、功能点、测试范围等"
+              templateId="test-report"
+            />
 
-            <Card
-              hoverable
-              style={{ width: 240 }}
-              cover={
-                <div
-                  style={{
-                    height: 160,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: '#f5f5f5',
-                  }}
-                >
-                  <FileMarkdownOutlined style={{ fontSize: 64 }} />
-                </div>
-              }
-            >
-              <Card.Meta
-                title="发布计划"
-                description="详细的发布计划文档，包含发布时间、功能列表、风险评估等"
-              />
-              <div style={{ marginTop: 16 }}>
-                <Link href="/template?id=release-plan" passHref>
-                  <Button type="primary">使用此模板</Button>
-                </Link>
-              </div>
-            </Card>
-          </Space>
+            <TemplateCard
+              icon={<FileMarkdownOutlined style={{ fontSize: 64 }} />}
+              title="发布计划"
+              description="详细的发布计划文档，包含发布时间、功能列表、风险评估等"
+              templateId="release-plan"
+            />
+          </TemplateCardContainer>
         </Card>
         {/* TODO: 未来支持自定义模板 */}
         {/* <Card title="自定义模板" variant="borderless">
