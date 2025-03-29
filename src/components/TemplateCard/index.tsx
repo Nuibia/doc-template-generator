@@ -19,7 +19,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ icon, title, description, t
         <p className={styles.cardDescription}>{description}</p>
       </div>
       <div className={styles.cardAction}>
-        <Link href={`/template?id=${templateId}`} passHref>
+        <Link href={`/template/${templateId}`} passHref>
           <Button type="primary">使用此模板</Button>
         </Link>
       </div>
