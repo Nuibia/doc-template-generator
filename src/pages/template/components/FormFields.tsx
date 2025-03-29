@@ -46,26 +46,19 @@ const FormFields: React.FC<FormFieldsProps> = ({
   const fieldRenderers: Record<string, FieldRenderer> = {
     text: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>
-        <Input placeholder={field.placeholder} defaultValue={field.defaultValue as string} />
+        <Input placeholder={field.placeholder} />
       </Form.Item>
     ),
 
     textarea: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>
-        <TextArea
-          placeholder={field.placeholder}
-          defaultValue={field.defaultValue as string}
-          autoSize={{ minRows: 3, maxRows: 6 }}
-        />
+        <TextArea placeholder={field.placeholder} autoSize={{ minRows: 3, maxRows: 6 }} />
       </Form.Item>
     ),
 
     select: (field: TemplateField, fieldName: string, rules: Rule[] | undefined) => (
       <Form.Item key={field.id} name={fieldName} label={field.label} rules={rules} preserve={true}>
-        <Select
-          placeholder={field.placeholder}
-          defaultValue={field.defaultValue as string | number}
-        >
+        <Select placeholder={field.placeholder}>
           {field.options?.map(option => (
             <Option key={option.value} value={option.value}>
               {option.label}

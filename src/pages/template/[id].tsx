@@ -171,7 +171,7 @@ ${generatedHtmlContent}
   return (
     <div className={styles.container}>
       <Head>
-        <title>{template.name} - 文档模板生成器</title>
+        <title>{`${template.name} - 文档模板生成器`}</title>
       </Head>
 
       <div className={styles.pageHeader}>
