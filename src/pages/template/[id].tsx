@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import releasePlanTemplate from '../../templates/releasePlan';
 import testReportTemplate from '../../templates/testReport';
+import weeklyReportTemplate from '../../templates/weeklyReport';
 import FloatingButtons from './components/FloatingButtons';
 import FormFields from './components/FormFields';
 import PreviewContent from './components/PreviewContent';
@@ -18,6 +19,7 @@ const { Title, Paragraph } = Typography;
 const templateMap = {
   'test-report': testReportTemplate,
   'release-plan': releasePlanTemplate,
+  'weekly-report': weeklyReportTemplate,
 };
 
 const TemplatePage: React.FC = () => {
@@ -79,7 +81,7 @@ const TemplatePage: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${form.getFieldValue('projectName')}-提测文档.md`;
+    a.download = `${template.name}-${new Date().toLocaleDateString()}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -92,7 +94,7 @@ const TemplatePage: React.FC = () => {
 <html>
 <head>
 <meta charset="UTF-8">
-<title>${form.getFieldValue('projectName')}-提测文档</title>
+<title>${template.name}-${new Date().toLocaleDateString()}</title>
 <style>
   body { font-family: Arial, sans-serif; }
   table { border-collapse: collapse; width: 100%; }
@@ -113,7 +115,7 @@ ${generatedHtmlContent}
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${form.getFieldValue('projectName')}-提测文档.doc`;
+    a.download = `${template.name}-${new Date().toLocaleDateString()}.doc`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

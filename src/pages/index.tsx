@@ -1,4 +1,4 @@
-import { FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
+import { CalendarOutlined, FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
 import { Card, Space, Typography } from 'antd';
 import Head from 'next/head';
 import React from 'react';
@@ -27,6 +27,13 @@ const HomePage: React.FC = () => {
               title="提测文档"
               description="标准提测文档模板，包含版本、功能点、测试范围等"
               templateId="test-report"
+            />
+
+            <TemplateCard
+              icon={<CalendarOutlined style={{ fontSize: 64 }} />}
+              title="周报"
+              description="标准周报模板，包含项目进展、问题思考等"
+              templateId="weekly-report"
             />
 
             <TemplateCard
