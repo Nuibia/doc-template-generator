@@ -1,16 +1,16 @@
+import { useTemplateForm } from '@/hooks/useTemplateForm';
+import releasePlanTemplate from '@/templates/releasePlan';
+import testReportTemplate from '@/templates/testReport';
+import weeklyReportTemplate from '@/templates/weeklyReport';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Space, Tabs, Typography, message } from 'antd';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
-import releasePlanTemplate from '../../templates/releasePlan';
-import testReportTemplate from '../../templates/testReport';
-import weeklyReportTemplate from '../../templates/weeklyReport';
 import FloatingButtons from './components/FloatingButtons';
 import FormFields from './components/FormFields';
 import PreviewContent from './components/PreviewContent';
-import { useTemplateForm } from './hooks/useTemplateForm';
 import styles from './index.module.less';
 
 const { Title, Paragraph } = Typography;

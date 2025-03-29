@@ -1,5 +1,5 @@
-import testReportTemplate from '../../../templates/testReport';
-import weeklyReportTemplate from '../../../templates/weeklyReport';
+import testReportTemplate from '@/templates/testReport';
+import weeklyReportTemplate from '@/templates/weeklyReport';
 
 export type TemplateFormValues = Record<string, unknown>;
 
@@ -39,7 +39,3 @@ export interface Template {
 }
 
 export const templates = [testReportTemplate, weeklyReportTemplate];
-
-// 添加默认导出，解决Next.js构建优化错误
-const DefaultComponent = () => null;
-export default DefaultComponent;

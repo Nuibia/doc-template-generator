@@ -2,7 +2,7 @@ import { FileTextOutlined } from '@ant-design/icons';
 import { Checkbox, Divider, Form, Input, Radio, Select, Space } from 'antd';
 import { Rule } from 'antd/es/form';
 import React from 'react';
-import { FormInstance, Template, TemplateField, TemplateFormValues } from '../types';
+import { FormInstance, Template, TemplateField, TemplateFormValues } from '../../../types/template';
 import TableField from './TableField';
 
 const { TextArea } = Input;

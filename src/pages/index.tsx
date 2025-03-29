@@ -1,8 +1,8 @@
+import { TemplateCard, TemplateCardContainer } from '@/components';
 import { CalendarOutlined, FileMarkdownOutlined, FileTextOutlined } from '@ant-design/icons';
 import { Card, Space, Typography } from 'antd';
 import Head from 'next/head';
 import React from 'react';
-import { TemplateCard, TemplateCardContainer } from '../components';
 
 const { Title, Paragraph } = Typography;
 

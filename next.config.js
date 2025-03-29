@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /** @type {import('next').NextConfig} */
 const withLess = require('next-with-less');
+const path = require('path');
 
 const nextConfig = {
   reactStrictMode: true,
@@ -13,6 +14,10 @@ const nextConfig = {
   eslint: {
     dirs: ['src', 'pages', 'components'],
     ignoreDuringBuilds: false,
+  },
+  webpack: config => {
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
+    return config;
   },
 };
 
