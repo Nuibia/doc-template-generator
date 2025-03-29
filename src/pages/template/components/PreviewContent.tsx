@@ -2,6 +2,8 @@ import { CopyOutlined, ExportOutlined, FileWordOutlined } from '@ant-design/icon
 import { Button, Card, Radio, Space } from 'antd';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import styles from '../index.module.less';
 
 interface PreviewContentProps {
@@ -63,7 +65,9 @@ const PreviewContent: React.FC<PreviewContentProps> = ({
           />
         ) : (
           <div className={styles.markdownContent}>
-            <ReactMarkdown>{generatedContent}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+              {generatedContent}
+            </ReactMarkdown>
           </div>
         )}
       </div>

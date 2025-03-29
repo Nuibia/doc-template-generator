@@ -334,20 +334,26 @@ const testReportTemplate: TestReportTemplate = {
     let frontendTable = '';
     if (frontendProjects.length > 0) {
       frontendTable = `
-项目名 | Git地址 | 分支 | Jenkins地址
--------|--------|------|-------------
-${frontendProjects.map(p => `${p.repoUrl || ''} | ${p.gitUrl || ''} | ${p.repoBranch || ''} | ${p.jenkinsUrl || ''}`).join('\n')}
-`;
+| 项目名 | Git地址 | 分支 | Jenkins地址 |
+| --- | --- | --- | --- |${frontendProjects
+        .map(
+          p => `
+| ${p.repoUrl || '-'} | ${p.gitUrl || '-'} | ${p.repoBranch || '-'} | ${p.jenkinsUrl || '-'} |`
+        )
+        .join('')}`;
     }
 
     // 后端项目表格
     let backendTable = '';
     if (backendProjects.length > 0) {
       backendTable = `
-项目名 | Git地址 | 分支 | Jenkins地址
--------|--------|------|-------------
-${backendProjects.map(p => `${p.repoUrl || ''} | ${p.gitUrl || ''} | ${p.repoBranch || ''} | ${p.jenkinsUrl || ''}`).join('\n')}
-`;
+| 项目名 | Git地址 | 分支 | Jenkins地址 |
+| --- | --- | --- | --- |${backendProjects
+        .map(
+          p => `
+| ${p.repoUrl || '-'} | ${p.gitUrl || '-'} | ${p.repoBranch || '-'} | ${p.jenkinsUrl || '-'} |`
+        )
+        .join('')}`;
     }
 
     // 自定义配置（使用Markdown格式而非表格）
