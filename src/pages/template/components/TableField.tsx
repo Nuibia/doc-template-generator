@@ -1,8 +1,9 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Divider, Form, Input, Space } from 'antd';
+import { FormInstance } from 'antd/es/form';
 import type { FormListFieldData, FormListOperation } from 'antd/es/form/FormList';
 import React from 'react';
-import { FormInstance, Template, TemplateField, TemplateFormValues } from '../../../types/template';
+import { Template, TemplateField, TemplateFormValues } from '../../../types/template';
 
 const { TextArea } = Input;
 

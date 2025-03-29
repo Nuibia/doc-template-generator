@@ -1,6 +1,3 @@
-import testReportTemplate from '@/templates/testReport';
-import weeklyReportTemplate from '@/templates/weeklyReport';
-
 export type TemplateFormValues = Record<string, unknown>;
 
 export interface TemplateFieldOption {
@@ -37,5 +34,3 @@ export interface Template {
   generateMarkdown: (values: TemplateFormValues) => string;
   generateHtml: (values: TemplateFormValues) => string;
 }
-
-export const templates = [testReportTemplate, weeklyReportTemplate];

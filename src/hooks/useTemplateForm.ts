@@ -8,7 +8,7 @@ export const useTemplateForm = (template: Template) => {
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [generatedHtmlContent, setGeneratedHtmlContent] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('form');
-  const [initialFormData, setInitialFormData] = useState<TemplateFormValues>({});
+  const [initialFormData, setInitialFormData] = useState<TemplateFormValues>({ title: '' });
   const debounceTimerRef = useRef<number | null>(null);
 
   const loadSavedData = useCallback(() => {
@@ -45,7 +45,7 @@ export const useTemplateForm = (template: Template) => {
   );
 
   const handleReset = useCallback(() => {
-    setInitialFormData({});
+    setInitialFormData({ title: '' });
     form.resetFields();
     const templateId = template.name.toLowerCase().replace(/\s+/g, '-');
     localStorage.removeItem(`${templateId}_rich`);
