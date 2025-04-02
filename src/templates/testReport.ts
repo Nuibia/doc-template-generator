@@ -88,47 +88,6 @@ const testReportTemplate: TestReportTemplate = {
       ],
     },
     {
-      id: 'projectMembers',
-      name: 'projectMembers',
-      type: 'group',
-      label: '项目参与人员',
-      roles: ['pm'],
-      children: [
-        {
-          id: 'productManager',
-          name: 'productManager',
-          type: 'text',
-          label: '产品人员',
-          placeholder: '产品人员姓名，多人用逗号分隔',
-          required: true,
-        },
-        {
-          id: 'frontendDeveloper',
-          name: 'frontendDeveloper',
-          type: 'text',
-          label: '前端开发人员',
-          placeholder: '前端开发人员姓名，多人用逗号分隔',
-          required: true,
-        },
-        {
-          id: 'backendDeveloper',
-          name: 'backendDeveloper',
-          type: 'text',
-          label: '后端开发人员',
-          placeholder: '后端开发人员姓名，多人用逗号分隔',
-          required: true,
-        },
-        {
-          id: 'tester',
-          name: 'tester',
-          type: 'text',
-          label: '测试人员',
-          placeholder: '测试人员姓名，多人用逗号分隔',
-          required: true,
-        },
-      ],
-    },
-    {
       id: 'projects',
       name: 'projects',
       type: 'group',
@@ -297,12 +256,45 @@ const testReportTemplate: TestReportTemplate = {
       required: false,
     },
     {
-      id: 'attention',
-      name: 'attention',
-      type: 'textarea',
-      label: '注意事项',
-      placeholder: '需要特别注意的地方',
-      required: false,
+      id: 'projectMembers',
+      name: 'projectMembers',
+      type: 'group',
+      label: '项目参与人员',
+      roles: ['pm'],
+      children: [
+        {
+          id: 'productManager',
+          name: 'productManager',
+          type: 'text',
+          label: '产品人员',
+          placeholder: '产品人员姓名，多人用逗号分隔',
+          required: true,
+        },
+        {
+          id: 'frontendDeveloper',
+          name: 'frontendDeveloper',
+          type: 'text',
+          label: '前端开发人员',
+          placeholder: '前端开发人员姓名，多人用逗号分隔',
+          required: true,
+        },
+        {
+          id: 'backendDeveloper',
+          name: 'backendDeveloper',
+          type: 'text',
+          label: '后端开发人员',
+          placeholder: '后端开发人员姓名，多人用逗号分隔',
+          required: true,
+        },
+        {
+          id: 'tester',
+          name: 'tester',
+          type: 'text',
+          label: '测试人员',
+          placeholder: '测试人员姓名，多人用逗号分隔',
+          required: true,
+        },
+      ],
     },
     {
       id: 'remark',
@@ -474,12 +466,6 @@ ${values['serverConfigs.jobConfig']}
 
 `;
     }
-
-    // 注意事项 - 对所有角色都显示
-    content += `## 注意事项
-
-${values.attention || '无特别注意事项'}
-`;
 
     // 备注 - 仅PM角色显示
     if (showAll) {
@@ -688,11 +674,6 @@ ${backendTable}`;
   <li><strong>测试人员</strong>: ${values['projectMembers.tester'] || ''}</li>
 </ul>`;
     }
-
-    // 注意事项 - 对所有角色都显示
-    content += `
-<h2>注意事项</h2>
-<p>${values.attention || '无特别注意事项'}</p>`;
 
     // 备注 - 仅PM角色显示
     if (showAll) {
