@@ -403,16 +403,10 @@ ${values['documents.smokeDoc'] ? `  - **冒烟文档**: ${values['documents.smok
     }
 
     // 项目信息部分
-    if ((showFrontend && frontendTable) || (showBackend && backendTable)) {
+    if (showFrontend || showBackend) {
       content += `## 项目信息\n\n`;
-
-      if (showFrontend && frontendTable) {
-        content += `### 前端项目${frontendTable}\n\n`;
-      }
-
-      if (showBackend && backendTable) {
-        content += `### 后端项目${backendTable}\n\n`;
-      }
+      if (showFrontend) content += `### 前端项目${frontendTable}\n\n`;
+      if (showBackend) content += `### 后端项目${backendTable}\n\n`;
     }
 
     // 服务端配置部分 - 仅当显示后端内容时才显示
@@ -609,20 +603,16 @@ ${values.remark || '无'}`;
     }
 
     // 项目信息部分
-    if ((showFrontend && frontendTable) || (showBackend && backendTable)) {
+    if (showFrontend || showBackend) {
       content += `<h2>项目信息</h2>`;
-
-      if (showFrontend && frontendTable) {
+      if (showFrontend)
         content += `
 <h3>前端项目</h3>
 ${frontendTable}`;
-      }
-
-      if (showBackend && backendTable) {
+      if (showBackend)
         content += `
 <h3>后端项目</h3>
 ${backendTable}`;
-      }
     }
 
     // 服务端配置部分 - 仅当显示后端内容时才显示
