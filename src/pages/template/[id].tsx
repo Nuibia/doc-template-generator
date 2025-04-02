@@ -63,10 +63,18 @@ const TemplatePage: React.FC = () => {
     form
       .validateFields()
       .then(values => {
-        const markdownContent = template.generateMarkdown(values);
-        const htmlContent = template.generateHtml(values);
-        setGeneratedContent(markdownContent);
-        setGeneratedHtmlContent(htmlContent);
+        // 如果是提测报告模板，传入角色参数
+        if (isTestReportTemplate) {
+          const markdownContent = template.generateMarkdown(values, selectedRoles);
+          const htmlContent = template.generateHtml(values, selectedRoles);
+          setGeneratedContent(markdownContent);
+          setGeneratedHtmlContent(htmlContent);
+        } else {
+          const markdownContent = template.generateMarkdown(values);
+          const htmlContent = template.generateHtml(values);
+          setGeneratedContent(markdownContent);
+          setGeneratedHtmlContent(htmlContent);
+        }
         setActiveTab('preview');
       })
       .catch(() => message.error('请填写必填项'));
@@ -200,10 +208,18 @@ ${generatedHtmlContent}
             form
               .validateFields()
               .then(values => {
-                const markdownContent = template.generateMarkdown(values);
-                const htmlContent = template.generateHtml(values);
-                setGeneratedContent(markdownContent);
-                setGeneratedHtmlContent(htmlContent);
+                // 如果是提测报告模板，传入角色参数
+                if (isTestReportTemplate) {
+                  const markdownContent = template.generateMarkdown(values, selectedRoles);
+                  const htmlContent = template.generateHtml(values, selectedRoles);
+                  setGeneratedContent(markdownContent);
+                  setGeneratedHtmlContent(htmlContent);
+                } else {
+                  const markdownContent = template.generateMarkdown(values);
+                  const htmlContent = template.generateHtml(values);
+                  setGeneratedContent(markdownContent);
+                  setGeneratedHtmlContent(htmlContent);
+                }
                 setActiveTab(key);
               })
               .catch(() => {

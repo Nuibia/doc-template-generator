@@ -6,8 +6,8 @@ export interface TestReportTemplate {
   name: string;
   description: string;
   fields: TemplateField[];
-  generateMarkdown: (values: Record<string, any>) => string;
-  generateHtml: (values: Record<string, any>) => string;
+  generateMarkdown: (values: Record<string, any>, roles?: RoleType[]) => string;
+  generateHtml: (values: Record<string, any>, roles?: RoleType[]) => string;
 }
 
 export interface TemplateField {
@@ -313,7 +313,12 @@ const testReportTemplate: TestReportTemplate = {
       required: false,
     },
   ],
-  generateMarkdown: (values: Record<string, any>): string => {
+  generateMarkdown: (values: Record<string, any>, roles?: RoleType[]): string => {
+    // 如果未指定角色或包含PM角色，生成完整文档
+    const showAll = !roles || roles.includes('pm');
+    const showFrontend = showAll || (roles && roles.includes('frontend'));
+    const showBackend = showAll || (roles && roles.includes('backend'));
+
     // 处理前端项目
     let frontendProjects = [];
     if (Array.isArray(values.projects?.frontendProjects)) {
@@ -340,7 +345,7 @@ const testReportTemplate: TestReportTemplate = {
 
     // 前端项目表格
     let frontendTable = '';
-    if (frontendProjects.length > 0) {
+    if (showFrontend && frontendProjects.length > 0) {
       frontendTable = `
 | 项目名 | Git地址 | 分支 | Jenkins地址 |
 | --- | --- | --- | --- |${frontendProjects
@@ -353,7 +358,7 @@ const testReportTemplate: TestReportTemplate = {
 
     // 后端项目表格
     let backendTable = '';
-    if (backendProjects.length > 0) {
+    if (showBackend && backendProjects.length > 0) {
       backendTable = `
 | 项目名 | Git地址 | 分支 | Jenkins地址 |
 | --- | --- | --- | --- |${backendProjects
@@ -365,18 +370,24 @@ const testReportTemplate: TestReportTemplate = {
     }
 
     // 自定义配置（使用Markdown格式而非表格）
-    const customConfigsMarkdown = customConfigs
-      .map(c => {
-        return `
+    const customConfigsMarkdown = showBackend
+      ? customConfigs
+          .map(c => {
+            return `
 ### ${c.name || ''}
 \`\`\`
 ${c.code || ''}
 \`\`\`
 `;
-      })
-      .join('\n');
+          })
+          .join('\n')
+      : '';
 
-    return `# ${values.projectName} 提测文档
+    let content = '';
+
+    // 基本信息部分 - 如果是PM或包含PM角色才显示
+    if (showAll) {
+      content += `# ${values.projectName} 提测文档
 
 ## 基本信息
 
@@ -388,67 +399,105 @@ ${values['documents.frontendDocument'] ? `  - **前端技术文档**: ${values['
 ${values['documents.uiDocument'] ? `  - **UI稿**: ${values['documents.uiDocument']}` : ''}
 ${values['documents.smokeDoc'] ? `  - **冒烟文档**: ${values['documents.smokeDoc']}` : ''}
 
-## 项目信息
+`;
+    } else if (showFrontend) {
+      content += `# 前端项目信息
 
-### 前端项目${frontendTable}
+`;
+    } else if (showBackend) {
+      content += `# 后端项目信息
 
-### 后端项目${backendTable}
+`;
+    }
 
-## 服务端配置
+    // 项目信息部分
+    if ((showFrontend && frontendTable) || (showBackend && backendTable)) {
+      content += `## 项目信息\n\n`;
 
-${
-  values['serverConfigs.apolloConfig']
-    ? `### Apollo配置
+      if (showFrontend && frontendTable) {
+        content += `### 前端项目${frontendTable}\n\n`;
+      }
+
+      if (showBackend && backendTable) {
+        content += `### 后端项目${backendTable}\n\n`;
+      }
+    }
+
+    // 服务端配置部分 - 仅当显示后端内容时才显示
+    if (showBackend) {
+      content += `## 服务端配置\n\n`;
+
+      if (values['serverConfigs.apolloConfig']) {
+        content += `### Apollo配置
 \`\`\`
 ${values['serverConfigs.apolloConfig']}
 \`\`\`
-`
-    : ''
-}
+\n`;
+      }
 
-${
-  values['serverConfigs.databaseConfig']
-    ? `### 数据库配置
+      if (values['serverConfigs.databaseConfig']) {
+        content += `### 数据库配置
 \`\`\`
 ${values['serverConfigs.databaseConfig']}
 \`\`\`
-`
-    : ''
-}
+\n`;
+      }
 
-${
-  values['serverConfigs.jobConfig']
-    ? `### 定时脚本&消费队列
+      if (values['serverConfigs.jobConfig']) {
+        content += `### 定时脚本&消费队列
 \`\`\`
 ${values['serverConfigs.jobConfig']}
 \`\`\`
-`
-    : ''
-}
+\n`;
+      }
 
-${customConfigs.length > 0 ? '### 自定义配置' + customConfigsMarkdown : ''}
+      if (customConfigs.length > 0) {
+        content += `### 自定义配置${customConfigsMarkdown}\n`;
+      }
+    }
 
-${values.developBranch ? `- **开发分支**: ${values.developBranch}` : ''}
-${values.testBranch ? `- **测试分支**: ${values.testBranch}` : ''}
+    // 开发分支和测试分支 - 对所有角色都显示
+    if (values.developBranch || values.testBranch) {
+      content += `## 开发分支与测试分支\n\n`;
+      if (values.developBranch) content += `- **开发分支**: ${values.developBranch}\n`;
+      if (values.testBranch) content += `- **测试分支**: ${values.testBranch}\n\n`;
+    }
 
-## 项目参与人员
+    // 项目参与人员 - 仅PM角色显示
+    if (showAll) {
+      content += `## 项目参与人员
 
 - **产品人员**: ${values['projectMembers.productManager'] || ''}
 - **前端开发**: ${values['projectMembers.frontendDeveloper'] || ''}
 - **后端开发**: ${values['projectMembers.backendDeveloper'] || ''}
 - **测试人员**: ${values['projectMembers.tester'] || ''}
 
-## 注意事项
+`;
+    }
+
+    // 注意事项 - 对所有角色都显示
+    content += `## 注意事项
 
 ${values.attention || '无特别注意事项'}
+`;
 
+    // 备注 - 仅PM角色显示
+    if (showAll) {
+      content += `
 ## 备注
 
-${values.remark || '无'}
-`;
+${values.remark || '无'}`;
+    }
+
+    return content;
   },
 
-  generateHtml: (values: Record<string, any>): string => {
+  generateHtml: (values: Record<string, any>, roles?: RoleType[]): string => {
+    // 如果未指定角色或包含PM角色，生成完整文档
+    const showAll = !roles || roles.includes('pm');
+    const showFrontend = showAll || (roles && roles.includes('frontend'));
+    const showBackend = showAll || (roles && roles.includes('backend'));
+
     // 处理前端项目
     let frontendProjects = [];
     if (Array.isArray(values.projects?.frontendProjects)) {
@@ -475,7 +524,7 @@ ${values.remark || '无'}
 
     // 前端项目表格
     let frontendTable = '';
-    if (frontendProjects.length > 0) {
+    if (showFrontend && frontendProjects.length > 0) {
       frontendTable = `
 <table border="1" cellspacing="0" cellpadding="5" style="border-collapse: collapse; width: 100%;">
   <thead>
@@ -505,7 +554,7 @@ ${values.remark || '无'}
 
     // 后端项目表格
     let backendTable = '';
-    if (backendProjects.length > 0) {
+    if (showBackend && backendProjects.length > 0) {
       backendTable = `
 <table border="1" cellspacing="0" cellpadding="5" style="border-collapse: collapse; width: 100%;">
   <thead>
@@ -534,16 +583,22 @@ ${values.remark || '无'}
     }
 
     // 自定义配置
-    const customConfigsHtml = customConfigs
-      .map(c => {
-        return `
+    const customConfigsHtml = showBackend
+      ? customConfigs
+          .map(c => {
+            return `
 <h3>${c.name || ''}</h3>
 <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;"><code>${c.code || ''}</code></pre>
 `;
-      })
-      .join('');
+          })
+          .join('')
+      : '';
 
-    return `
+    let content = '';
+
+    // 标题和基本信息 - 根据角色决定显示内容
+    if (showAll) {
+      content += `
 <h1>${values.projectName} 提测文档</h1>
 
 <h2>基本信息</h2>
@@ -560,48 +615,70 @@ ${values.remark || '无'}
     </ul>
   </li>
 </ul>
+`;
+    } else if (showFrontend) {
+      content += `<h1>前端项目信息</h1>`;
+    } else if (showBackend) {
+      content += `<h1>后端项目信息</h1>`;
+    }
 
-<h2>项目信息</h2>
+    // 项目信息部分
+    if ((showFrontend && frontendTable) || (showBackend && backendTable)) {
+      content += `<h2>项目信息</h2>`;
 
+      if (showFrontend && frontendTable) {
+        content += `
 <h3>前端项目</h3>
-${frontendTable}
+${frontendTable}`;
+      }
 
+      if (showBackend && backendTable) {
+        content += `
 <h3>后端项目</h3>
-${backendTable}
+${backendTable}`;
+      }
+    }
 
-<h2>服务端配置</h2>
+    // 服务端配置部分 - 仅当显示后端内容时才显示
+    if (showBackend) {
+      content += `<h2>服务端配置</h2>`;
 
-${
-  values['serverConfigs.apolloConfig']
-    ? `<h3>Apollo配置</h3>
-<pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;"><code>${values['serverConfigs.apolloConfig']}</code></pre>
-`
-    : ''
-}
+      if (values['serverConfigs.apolloConfig']) {
+        content += `
+<h3>Apollo配置</h3>
+<pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;"><code>${values['serverConfigs.apolloConfig']}</code></pre>`;
+      }
 
-${
-  values['serverConfigs.databaseConfig']
-    ? `<h3>数据库配置</h3>
-<pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;"><code>${values['serverConfigs.databaseConfig']}</code></pre>
-`
-    : ''
-}
+      if (values['serverConfigs.databaseConfig']) {
+        content += `
+<h3>数据库配置</h3>
+<pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;"><code>${values['serverConfigs.databaseConfig']}</code></pre>`;
+      }
 
-${
-  values['serverConfigs.jobConfig']
-    ? `<h3>定时脚本&消费队列</h3>
-<pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;"><code>${values['serverConfigs.jobConfig']}</code></pre>
-`
-    : ''
-}
+      if (values['serverConfigs.jobConfig']) {
+        content += `
+<h3>定时脚本&消费队列</h3>
+<pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto;"><code>${values['serverConfigs.jobConfig']}</code></pre>`;
+      }
 
-${customConfigs.length > 0 ? `<h3>自定义配置</h3>${customConfigsHtml}` : ''}
+      if (customConfigs.length > 0) {
+        content += `<h3>自定义配置</h3>${customConfigsHtml}`;
+      }
+    }
 
+    // 开发分支和测试分支 - 对所有角色都显示
+    if (values.developBranch || values.testBranch) {
+      content += `
+<h2>开发分支与测试分支</h2>
 <ul>
   ${values.developBranch ? `<li><strong>开发分支</strong>: ${values.developBranch}</li>` : ''}
   ${values.testBranch ? `<li><strong>测试分支</strong>: ${values.testBranch}</li>` : ''}
-</ul>
+</ul>`;
+    }
 
+    // 项目参与人员 - 仅PM角色显示
+    if (showAll) {
+      content += `
 <h2>项目参与人员</h2>
 
 <ul>
@@ -609,16 +686,22 @@ ${customConfigs.length > 0 ? `<h3>自定义配置</h3>${customConfigsHtml}` : ''
   <li><strong>前端开发</strong>: ${values['projectMembers.frontendDeveloper'] || ''}</li>
   <li><strong>后端开发</strong>: ${values['projectMembers.backendDeveloper'] || ''}</li>
   <li><strong>测试人员</strong>: ${values['projectMembers.tester'] || ''}</li>
-</ul>
+</ul>`;
+    }
 
+    // 注意事项 - 对所有角色都显示
+    content += `
 <h2>注意事项</h2>
+<p>${values.attention || '无特别注意事项'}</p>`;
 
-<p>${values.attention || '无特别注意事项'}</p>
-
+    // 备注 - 仅PM角色显示
+    if (showAll) {
+      content += `
 <h2>备注</h2>
+<p>${values.remark || '无'}</p>`;
+    }
 
-<p>${values.remark || '无'}</p>
-`;
+    return content;
   },
 };
 
