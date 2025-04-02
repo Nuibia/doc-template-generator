@@ -1,4 +1,5 @@
-import { Header } from '@/components';
+import { Header, RoleSelector } from '@/components';
+import { RoleType } from '@/components/RoleSelector';
 import { useTemplateForm } from '@/hooks/useTemplateForm';
 import releasePlanTemplate from '@/templates/releasePlan';
 import testReportTemplate from '@/templates/testReport';
@@ -24,6 +25,16 @@ const TemplatePage: React.FC = () => {
   const { id } = router.query;
   const templateId = typeof id === 'string' ? id : 'test-report';
   const template = templateMap[templateId as keyof typeof templateMap] || testReportTemplate;
+
+  // 用户选择的角色，默认全选
+  const [selectedRoles, setSelectedRoles] = React.useState<RoleType[]>([
+    'pm',
+    'frontend',
+    'backend',
+  ]);
+
+  // 判断当前是否是提测文档模板
+  const isTestReportTemplate = templateId === 'test-report';
 
   const {
     form,
@@ -122,6 +133,9 @@ ${generatedHtmlContent}
 
   const formContent = (
     <Card variant="borderless">
+      {isTestReportTemplate && (
+        <RoleSelector selectedRoles={selectedRoles} onChange={setSelectedRoles} />
+      )}
       <Form
         form={form}
         layout="vertical"
@@ -137,6 +151,7 @@ ${generatedHtmlContent}
           saveToLocalStorage={saveToLocalStorage}
           setGeneratedContent={setGeneratedContent}
           setGeneratedHtmlContent={setGeneratedHtmlContent}
+          selectedRoles={isTestReportTemplate ? selectedRoles : ['pm', 'frontend', 'backend']}
         />
       </Form>
     </Card>

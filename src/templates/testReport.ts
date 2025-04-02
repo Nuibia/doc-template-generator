@@ -1,4 +1,5 @@
 // 提测文档模板定义
+import { RoleType } from '@/components/RoleSelector';
 
 export interface TestReportTemplate {
   id: string;
@@ -20,6 +21,7 @@ export interface TemplateField {
   defaultValue?: any;
   children?: TemplateField[];
   columns?: TemplateField[];
+  roles?: RoleType[]; // 哪些角色可以查看此字段
 }
 
 const testReportTemplate: TestReportTemplate = {
@@ -34,12 +36,14 @@ const testReportTemplate: TestReportTemplate = {
       label: '项目名称',
       placeholder: '请输入项目名称',
       required: true,
+      roles: ['pm'],
     },
     {
       id: 'documents',
       name: 'documents',
       type: 'group',
       label: '文档',
+      roles: ['pm'],
       children: [
         {
           id: 'prdDocument',
@@ -84,6 +88,47 @@ const testReportTemplate: TestReportTemplate = {
       ],
     },
     {
+      id: 'projectMembers',
+      name: 'projectMembers',
+      type: 'group',
+      label: '项目参与人员',
+      roles: ['pm'],
+      children: [
+        {
+          id: 'productManager',
+          name: 'productManager',
+          type: 'text',
+          label: '产品人员',
+          placeholder: '产品人员姓名，多人用逗号分隔',
+          required: true,
+        },
+        {
+          id: 'frontendDeveloper',
+          name: 'frontendDeveloper',
+          type: 'text',
+          label: '前端开发人员',
+          placeholder: '前端开发人员姓名，多人用逗号分隔',
+          required: true,
+        },
+        {
+          id: 'backendDeveloper',
+          name: 'backendDeveloper',
+          type: 'text',
+          label: '后端开发人员',
+          placeholder: '后端开发人员姓名，多人用逗号分隔',
+          required: true,
+        },
+        {
+          id: 'tester',
+          name: 'tester',
+          type: 'text',
+          label: '测试人员',
+          placeholder: '测试人员姓名，多人用逗号分隔',
+          required: true,
+        },
+      ],
+    },
+    {
       id: 'projects',
       name: 'projects',
       type: 'group',
@@ -95,6 +140,7 @@ const testReportTemplate: TestReportTemplate = {
           type: 'table',
           label: '前端项目',
           required: true,
+          roles: ['frontend'],
           columns: [
             {
               id: 'repoUrl',
@@ -136,6 +182,7 @@ const testReportTemplate: TestReportTemplate = {
           type: 'table',
           label: '后端项目',
           required: true,
+          roles: ['backend'],
           columns: [
             {
               id: 'repoUrl',
@@ -178,6 +225,7 @@ const testReportTemplate: TestReportTemplate = {
       name: 'serverConfigs',
       type: 'group',
       label: '服务端配置',
+      roles: ['backend'],
       children: [
         {
           id: 'apolloConfig',
@@ -247,46 +295,6 @@ const testReportTemplate: TestReportTemplate = {
       placeholder: '请输入测试分支，如: test/xxx',
       defaultValue: '',
       required: false,
-    },
-    {
-      id: 'projectMembers',
-      name: 'projectMembers',
-      type: 'group',
-      label: '项目参与人员',
-      children: [
-        {
-          id: 'productManager',
-          name: 'productManager',
-          type: 'text',
-          label: '产品人员',
-          placeholder: '产品人员姓名，多人用逗号分隔',
-          required: true,
-        },
-        {
-          id: 'frontendDeveloper',
-          name: 'frontendDeveloper',
-          type: 'text',
-          label: '前端开发人员',
-          placeholder: '前端开发人员姓名，多人用逗号分隔',
-          required: true,
-        },
-        {
-          id: 'backendDeveloper',
-          name: 'backendDeveloper',
-          type: 'text',
-          label: '后端开发人员',
-          placeholder: '后端开发人员姓名，多人用逗号分隔',
-          required: true,
-        },
-        {
-          id: 'tester',
-          name: 'tester',
-          type: 'text',
-          label: '测试人员',
-          placeholder: '测试人员姓名，多人用逗号分隔',
-          required: true,
-        },
-      ],
     },
     {
       id: 'attention',
@@ -374,7 +382,7 @@ ${c.code || ''}
 
 - **项目名称**: ${values.projectName}
 - **相关文档**:
-  - **PRD原型稿**: ${values['documents.prdDocument'] || ''}
+- **PRD原型稿**: ${values['documents.prdDocument'] || ''}
 ${values['documents.backendDocument'] ? `  - **后端技术文档**: ${values['documents.backendDocument']}` : ''}
 ${values['documents.frontendDocument'] ? `  - **前端技术文档**: ${values['documents.frontendDocument']}` : ''}
 ${values['documents.uiDocument'] ? `  - **UI稿**: ${values['documents.uiDocument']}` : ''}

@@ -2,6 +2,7 @@ import { FileTextOutlined } from '@ant-design/icons';
 import { Checkbox, Divider, Form, Input, Radio, Select, Space } from 'antd';
 import { FormInstance, Rule } from 'antd/es/form';
 import React from 'react';
+import { RoleType } from '../../../components/RoleSelector';
 import { Template, TemplateField, TemplateFormValues } from '../../../types/template';
 import TableField from './TableField';
 
@@ -20,6 +21,7 @@ interface FormFieldsProps {
   saveToLocalStorage: (values: TemplateFormValues) => void;
   setGeneratedContent: (content: string) => void;
   setGeneratedHtmlContent: (content: string) => void;
+  selectedRoles?: RoleType[];
 }
 
 type FieldRenderer = (
@@ -37,6 +39,7 @@ const FormFields: React.FC<FormFieldsProps> = ({
   saveToLocalStorage,
   setGeneratedContent,
   setGeneratedHtmlContent,
+  selectedRoles = ['pm', 'frontend', 'backend'],
 }) => {
   // 安全检查
   if (!fields || !form || !template) {
@@ -111,6 +114,7 @@ const FormFields: React.FC<FormFieldsProps> = ({
             saveToLocalStorage={saveToLocalStorage}
             setGeneratedContent={setGeneratedContent}
             setGeneratedHtmlContent={setGeneratedHtmlContent}
+            selectedRoles={selectedRoles}
           />
         )}
       </React.Fragment>
@@ -131,7 +135,16 @@ const FormFields: React.FC<FormFieldsProps> = ({
     ),
   };
 
-  return fields.map(field => {
+  // 根据角色过滤字段
+  const filteredFields = fields.filter(field => {
+    // 如果字段没有指定角色，对所有角色可见
+    if (!field.roles) return true;
+
+    // 检查当前选择的角色是否与字段所需角色有交集
+    return selectedRoles.some(role => field.roles?.includes(role));
+  });
+
+  return filteredFields.map(field => {
     const fieldName = parentPath ? `${parentPath}.${field.name}` : field.name;
     const rules = field.required
       ? [{ required: true, message: `请输入${field.label}` }]

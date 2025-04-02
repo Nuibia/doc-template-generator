@@ -19,6 +19,7 @@ export interface TemplateField {
     placeholder?: string;
     required?: boolean;
   }>;
+  roles?: string[];
 }
 
 export interface BaseTemplateValues {
