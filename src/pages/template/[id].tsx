@@ -1,19 +1,16 @@
+import { Header } from '@/components';
 import { useTemplateForm } from '@/hooks/useTemplateForm';
 import releasePlanTemplate from '@/templates/releasePlan';
 import testReportTemplate from '@/templates/testReport';
 import weeklyReportTemplate from '@/templates/weeklyReport';
-import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Button, Card, Form, Space, Tabs, Typography, message } from 'antd';
+import { Card, Form, Tabs, message } from 'antd';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import FloatingButtons from './components/FloatingButtons';
 import FormFields from './components/FormFields';
 import PreviewContent from './components/PreviewContent';
 import styles from './index.module.less';
-
-const { Title, Paragraph } = Typography;
 
 // 模板映射
 const templateMap = {
@@ -174,19 +171,12 @@ ${generatedHtmlContent}
         <title>{`${template.name} - 文档模板生成器`}</title>
       </Head>
 
-      <div className={styles.pageHeader}>
-        <Space>
-          <Link href="/" passHref>
-            <Button icon={<ArrowLeftOutlined />} type="link">
-              返回首页
-            </Button>
-          </Link>
-          <Title level={2} style={{ margin: 0 }}>
-            {template.name}
-          </Title>
-        </Space>
-        <Paragraph className={styles.description}>{template.description}</Paragraph>
-      </div>
+      <Header
+        title={template.name}
+        description={template.description}
+        showBackButton={true}
+        backButtonTo="/"
+      />
 
       <Tabs
         activeKey={activeTab}
